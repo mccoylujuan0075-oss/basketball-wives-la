@@ -160,6 +160,68 @@
 
     .stream-note strong { color: var(--accent2); }
 
+    /* ---------- Local MP4 player ---------- */
+    .player-section {
+      background: var(--panel);
+      border: 2px solid var(--accent);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: 0 15px 50px var(--shadow);
+    }
+
+    .player-title {
+      margin: 0 0 16px;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 1.4rem;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--accent);
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      margin-bottom: 18px;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+
+    .upload-zone p { margin: 0 0 12px; line-height: 1.6; }
+
+    .upload-zone.drag-over {
+      background: rgba(255, 20, 147, 0.2);
+      border-style: solid;
+      box-shadow: 0 0 25px rgba(255, 20, 147, 0.4);
+    }
+
+    .upload-status { margin: 12px 0 0; color: var(--accent2); font-size: 0.9rem; }
+
+    .video-player-container {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .video-player-container video { width: 100%; height: 100%; display: block; }
+
+    .mp4-tag {
+      display: inline-block;
+      background: var(--accent2);
+      color: #0a0e27;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: bold;
+    }
+
+    .card-actions { display: flex; gap: 6px; align-items: center; }
+
+    a.watched-btn { text-decoration: none; }
+
     /* ---------- Controls & stats ---------- */
     .controls {
       display: flex;
@@ -433,10 +495,27 @@
     </section>
 
     <div class="stream-note">
-      📡 <strong>No embedded player here.</strong> Playback happens on Pluto TV itself —
-      free with ads, no account needed. Pick any episode below and it opens on Pluto's
-      site ready to play. Mark episodes as watched to track your binge.
+      📡 Every episode <strong>deep-links to Pluto TV</strong> (free with ads, no account needed).
+      Got your own MP4 files? Load them into the player below and they'll play right here —
+      100% in your browser, nothing uploaded anywhere.
     </div>
+
+    <section class="player-section" id="playerSection">
+      <h2 class="player-title" id="playerTitle">🎞 Local MP4 Player</h2>
+      <div class="upload-zone" id="uploadZone">
+        <p>
+          📤 Drag &amp; drop MP4 files here, or browse. Files load into the last-selected
+          episode first, then open slots in order.
+        </p>
+        <input type="file" id="fileInput" accept=".mp4,video/mp4" multiple hidden />
+        <button class="cta" id="browseBtn">➕ Choose MP4 Files</button>
+        <button class="cta ghost" id="clearBtn">🗑️ Clear All</button>
+        <p class="upload-status" id="uploadStatus"></p>
+      </div>
+      <div class="video-player-container">
+        <video id="mainVideo" controls></video>
+      </div>
+    </section>
 
     <h2 style="color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0;">
       📺 Episode Guide
@@ -563,6 +642,8 @@
       url: id ? EP_URL(id) : SEASON_URL(season),
       thumb: id ? THUMB(id, shot) : FALLBACK_THUMB,
       key: season + "-" + code,
+      localUrl: null,
+      fileName: null,
     }));
 
     // Watched tracking (persists across reloads)
@@ -575,11 +656,23 @@
     const seasonFilter = document.getElementById("seasonFilter");
     const noResults = document.getElementById("noResults");
     const libraryStats = document.getElementById("libraryStats");
+    const mainVideo = document.getElementById("mainVideo");
+    const playerTitle = document.getElementById("playerTitle");
+    const playerSection = document.getElementById("playerSection");
+    const uploadZone = document.getElementById("uploadZone");
+    const fileInput = document.getElementById("fileInput");
+    const browseBtn = document.getElementById("browseBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const uploadStatus = document.getElementById("uploadStatus");
+
+    let currentEp = null;
 
     const renderStats = (shown) => {
+      const loaded = EPISODES.filter((ep) => ep.localUrl).length;
       libraryStats.innerHTML = `
         <span class="chip">📚 ${EPISODES.length} episodes · 5 seasons</span>
         <span class="chip">🔎 ${shown} shown</span>
+        <span class="chip">🎞 ${loaded} MP4 loaded</span>
         <span class="chip">✅ ${watched.size} watched</span>
       `;
     };
@@ -601,17 +694,15 @@
       noResults.style.display = list.length === 0 ? "block" : "none";
 
       list.forEach((ep) => {
-        const card = document.createElement("a");
+        const card = document.createElement("div");
         card.className = "video-card";
-        card.href = ep.url;
-        card.target = "_blank";
-        card.rel = "noopener";
-        card.title = "Watch on Pluto TV";
+        card.dataset.key = ep.key;
+        card.title = ep.localUrl ? "Play your MP4" : "Watch on Pluto TV";
         card.innerHTML = `
           <div class="video-thumbnail">
             <img src="${ep.thumb}" alt="Basketball Wives LA S${ep.season} E${ep.code}" loading="lazy"
                  onerror="this.onerror=null;this.src='${FALLBACK_THUMB}';" />
-            <div class="play-overlay">▶</div>
+            <div class="play-overlay">${ep.localUrl ? "▶" : "↗"}</div>
           </div>
           <div class="video-info">
             <h3 class="video-title">${ep.title}</h3>
@@ -620,11 +711,16 @@
               <div class="tag-row">
                 <span class="season-tag">S${ep.season} · E${ep.code}</span>
                 <span class="year-tag">${YEAR[ep.season]}</span>
+                ${ep.localUrl ? '<span class="mp4-tag" title="' + ep.fileName + '">🎞 MP4</span>' : ""}
                 ${watched.has(ep.key) ? '<span class="watched-tag">✓ WATCHED</span>' : ""}
               </div>
-              <button class="watched-btn ${watched.has(ep.key) ? "done" : ""}" data-key="${ep.key}">
-                ${watched.has(ep.key) ? "✓ Watched" : "Mark watched"}
-              </button>
+              <div class="card-actions">
+                <a class="watched-btn pluto-link" href="${ep.url}" target="_blank" rel="noopener"
+                   title="Open on Pluto TV">Pluto ↗</a>
+                <button class="watched-btn ${watched.has(ep.key) ? "done" : ""}" data-key="${ep.key}">
+                  ${watched.has(ep.key) ? "✓ Watched" : "Mark watched"}
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -634,15 +730,121 @@
       renderStats(list.length);
     };
 
+    const playLocal = (ep) => {
+      currentEp = ep;
+      playerTitle.textContent = `🎞 Now Playing: S${ep.season} E${ep.code} — ${ep.title}`;
+      mainVideo.src = ep.localUrl;
+      uploadStatus.textContent = "";
+      mainVideo.play().catch(() => console.log("Autoplay blocked"));
+      playerSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
     videoGrid.addEventListener("click", (e) => {
-      const btn = e.target.closest(".watched-btn");
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const key = btn.dataset.key;
-      if (watched.has(key)) watched.delete(key);
-      else watched.add(key);
+      // Watched toggle
+      const btn = e.target.closest("button.watched-btn");
+      if (btn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const key = btn.dataset.key;
+        if (watched.has(key)) watched.delete(key);
+        else watched.add(key);
+        saveWatched();
+        render();
+        return;
+      }
+      // Explicit Pluto link — let it navigate
+      if (e.target.closest(".pluto-link")) return;
+
+      const card = e.target.closest(".video-card");
+      if (!card) return;
+      const ep = EPISODES.find((x) => x.key === card.dataset.key);
+      if (!ep) return;
+
+      if (ep.localUrl) {
+        playLocal(ep);
+      } else {
+        uploadStatus.textContent =
+          `⚠️ No local MP4 for S${ep.season} E${ep.code} — opening Pluto TV instead.`;
+        uploadStatus.style.color = "#fbbf24";
+        window.open(ep.url, "_blank");
+      }
+    });
+
+    // ---------- Local MP4 upload / playback ----------
+    const handleFiles = (fileList) => {
+      const candidates = Array.from(fileList).filter(
+        (f) => f.type === "video/mp4" || f.name.toLowerCase().endsWith(".mp4")
+      );
+      if (!candidates.length) {
+        uploadStatus.textContent = "⚠️ No MP4 files detected. Please choose .mp4 files.";
+        uploadStatus.style.color = "#fbbf24";
+        return;
+      }
+
+      let assigned = 0;
+      let target = currentEp && !currentEp.localUrl ? currentEp : null;
+      candidates.forEach((file) => {
+        const ep = target || EPISODES.find((v) => !v.localUrl);
+        target = null;
+        if (!ep) return;
+        ep.localUrl = URL.createObjectURL(file);
+        ep.fileName = file.name;
+        assigned++;
+      });
+
+      const skipped = candidates.length - assigned;
+      uploadStatus.textContent =
+        `✅ ${assigned} MP4 file(s) loaded` +
+        (skipped > 0 ? ` — ${skipped} skipped (all 70 slots filled).` : ".");
+      uploadStatus.style.color = "#10b981";
+      render();
+    };
+
+    browseBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", (e) => {
+      handleFiles(e.target.files);
+      fileInput.value = "";
+    });
+
+    ["dragenter", "dragover"].forEach((evt) =>
+      uploadZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        uploadZone.classList.add("drag-over");
+      })
+    );
+    ["dragleave", "drop"].forEach((evt) =>
+      uploadZone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove("drag-over");
+      })
+    );
+    uploadZone.addEventListener("drop", (e) => handleFiles(e.dataTransfer.files));
+
+    clearBtn.addEventListener("click", () => {
+      EPISODES.forEach((ep) => {
+        if (ep.localUrl) {
+          URL.revokeObjectURL(ep.localUrl);
+          ep.localUrl = null;
+          ep.fileName = null;
+        }
+      });
+      currentEp = null;
+      mainVideo.removeAttribute("src");
+      mainVideo.load();
+      playerTitle.textContent = "🎞 Local MP4 Player";
+      uploadStatus.textContent = "🗑️ All local videos cleared.";
+      uploadStatus.style.color = "#ef4444";
+      render();
+    });
+
+    // Auto-advance to the next episode that has a local MP4
+    mainVideo.addEventListener("ended", () => {
+      if (!currentEp) return;
+      watched.add(currentEp.key);
       saveWatched();
+      const idx = EPISODES.findIndex((x) => x.key === currentEp.key);
+      const next = EPISODES.slice(idx + 1).find((x) => x.localUrl);
+      if (next) playLocal(next);
       render();
     });
 
