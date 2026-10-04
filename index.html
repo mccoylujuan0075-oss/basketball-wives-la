@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basketball Wives LA - MP4 Video Player</title>
+  <title>Basketball Wives LA — Free Episode Guide | Pluto TV</title>
   <style>
     :root {
       --bg1: #0a0e27;
@@ -17,9 +17,7 @@
       --shadow: rgba(0, 0, 0, 0.5);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -62,45 +60,112 @@
       padding: 32px 20px;
     }
 
-    .player-section {
+    /* ---------- Hero ---------- */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 28px;
+      align-items: center;
       background: var(--panel);
       border: 2px solid var(--accent);
       border-radius: 20px;
       padding: 32px;
-      margin-bottom: 40px;
+      margin-bottom: 32px;
       box-shadow: 0 15px 50px var(--shadow);
     }
 
-    .player-title {
-      font-size: 1.8rem;
+    .hero h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
       color: var(--accent2);
-      margin: 0 0 20px;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
     }
 
-    .video-player-container {
+    .hero .lede {
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin: 0 0 18px;
+    }
+
+    .meta-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .meta-chips span {
+      background: rgba(0, 217, 255, 0.1);
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .cta {
+      display: inline-block;
+      padding: 14px 26px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .cta:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 20, 147, 0.4);
+    }
+
+    .cta.ghost {
+      background: transparent;
+      border: 2px solid var(--accent2);
+      color: var(--accent2);
+    }
+
+    .hero-art { text-align: center; }
+
+    .hero-art img {
       width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
+      max-width: 340px;
       border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 20px;
+      border: 2px solid var(--accent2);
       box-shadow: 0 10px 30px var(--shadow);
     }
 
-    video {
-      width: 100%;
-      height: 100%;
-      display: block;
+    .hero-art figcaption {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 10px;
     }
 
+    .stream-note {
+      background: rgba(255, 20, 147, 0.1);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .stream-note strong { color: var(--accent2); }
+
+    /* ---------- Controls & stats ---------- */
     .controls {
       display: flex;
       gap: 12px;
-      margin-bottom: 28px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
-      align-items: center;
     }
 
     .search-box {
@@ -133,10 +198,25 @@
       transition: all 0.3s ease;
     }
 
-    .filter-select:hover {
-      box-shadow: 0 0 15px var(--accent2);
+    .filter-select:hover { box-shadow: 0 0 15px var(--accent2); }
+
+    .library-stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin: 0 0 24px;
     }
 
+    .library-stats .chip {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 217, 255, 0.3);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    /* ---------- Episode grid ---------- */
     .video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -152,6 +232,11 @@
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px var(--shadow);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
 
     .video-card:hover {
@@ -162,31 +247,39 @@
 
     .video-thumbnail {
       width: 100%;
-      height: 160px;
+      aspect-ratio: 16 / 9;
       background: linear-gradient(135deg, #333, #555);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       position: relative;
       overflow: hidden;
     }
 
-    .video-thumbnail::before {
-      content: "▶";
-      font-size: 3rem;
+    .video-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .video-card:hover .video-thumbnail img { transform: scale(1.06); }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 14, 39, 0.35);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      font-size: 2.6rem;
       color: var(--accent);
-      opacity: 0.6;
-      transition: all 0.3s ease;
+      text-shadow: 0 0 18px rgba(255, 20, 147, 0.8);
     }
 
-    .video-card:hover .video-thumbnail::before {
-      opacity: 1;
-      transform: scale(1.2);
-    }
+    .video-card:hover .play-overlay { opacity: 1; }
 
-    .video-info {
-      padding: 16px;
-    }
+    .video-info { padding: 16px; flex: 1; display: flex; flex-direction: column; }
 
     .video-title {
       font-weight: bold;
@@ -196,12 +289,27 @@
       line-height: 1.4;
     }
 
-    .video-meta {
-      font-size: 0.85rem;
+    .video-desc {
+      font-size: 0.83rem;
       color: var(--text-muted);
-      margin: 0;
-      line-height: 1.5;
+      margin: 0 0 12px;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
     }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
 
     .season-tag {
       display: inline-block;
@@ -209,24 +317,17 @@
       color: white;
       padding: 4px 10px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: bold;
     }
 
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .mp4-tag {
+    .year-tag {
       display: inline-block;
-      background: var(--accent2);
-      color: #0a0e27;
+      background: rgba(0, 217, 255, 0.15);
+      color: var(--accent2);
       padding: 4px 10px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: bold;
     }
 
@@ -236,99 +337,37 @@
       color: white;
       padding: 4px 10px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: bold;
     }
 
-    .nav-controls {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .library-stats {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin: 16px 0 20px;
-    }
-
-    .library-stats .chip {
-      background: var(--card-bg);
-      border: 1px solid rgba(0, 217, 255, 0.3);
-      padding: 6px 14px;
-      border-radius: 999px;
-    }
-
-    .upload-section.drag-over {
-      background: rgba(255, 20, 147, 0.25);
-      border-style: solid;
-      box-shadow: 0 0 25px rgba(255, 20, 147, 0.5);
-    }
-
-    .video-info-panel {
-      background: rgba(255, 20, 147, 0.1);
-      border-left: 4px solid var(--accent);
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-
-    .detail-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 12px;
-      font-size: 0.95rem;
-    }
-
-    .detail-label {
+    .watched-btn {
+      background: transparent;
+      border: 1.5px solid var(--accent2);
       color: var(--accent2);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
       font-weight: bold;
-      min-width: 120px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
-    .detail-value {
-      color: var(--text);
+    .watched-btn:hover { background: rgba(0, 217, 255, 0.15); }
+
+    .watched-btn.done {
+      border-color: #10b981;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.12);
     }
 
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-box {
-      background: rgba(0, 217, 255, 0.1);
-      border: 1px solid var(--accent2);
-      padding: 16px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .stat-number {
-      font-size: 1.8rem;
-      color: var(--accent2);
+    .watch-link {
+      color: var(--accent);
+      font-size: 0.78rem;
       font-weight: bold;
-    }
-
-    .stat-label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .description-box {
-      color: var(--text-muted);
-      line-height: 1.7;
-      font-size: 0.95rem;
-      padding: 16px;
-      background: rgba(0, 217, 255, 0.05);
-      border-radius: 12px;
-      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
     }
 
     .no-results {
@@ -338,165 +377,81 @@
       font-size: 1.1rem;
     }
 
-    .upload-section {
-      background: rgba(255, 20, 147, 0.1);
-      border: 2px dashed var(--accent);
-      border-radius: 16px;
-      padding: 32px;
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .upload-section h3 {
-      color: var(--accent2);
-      margin-top: 0;
-    }
-
-    .file-input {
-      display: none;
-    }
-
-    .upload-btn {
-      display: inline-block;
-      padding: 12px 24px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border: none;
-      color: white;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      margin: 10px 5px;
-    }
-
-    .upload-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(255, 20, 147, 0.4);
-    }
-
     footer {
       text-align: center;
       padding: 32px 20px;
       border-top: 1px solid rgba(255, 20, 147, 0.2);
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       background: var(--panel);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 768px) {
-      .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      }
-
-      .player-section {
-        padding: 20px;
-      }
-
-      .controls {
-        flex-direction: column;
-      }
-
-      .search-box,
-      .filter-select {
-        width: 100%;
-      }
+      .video-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+      .controls { flex-direction: column; }
+      .search-box, .filter-select { width: 100%; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>🎬 Basketball Wives LA</h1>
-    <p>MP4 Video Player | 100 Episode Library</p>
+    <p>Free Episode Guide | Every Episode Streams on Pluto TV</p>
   </header>
 
   <div class="container">
-    <div class="upload-section">
-      <h3>📤 Upload Your MP4 Videos</h3>
-      <p style="color: var(--text-muted); margin-bottom: 20px;">
-        Drag &amp; drop MP4 files here, or click to browse. Files fill the selected episode
-        first, then open slots in order.
-      </p>
-      <input type="file" id="fileInput" class="file-input" accept=".mp4" multiple />
-      <button class="upload-btn" onclick="document.getElementById('fileInput').click();">
-        ➕ Choose MP4 Files
-      </button>
-      <button class="upload-btn" onclick="clearAllVideos();">
-        🗑️ Clear All
-      </button>
-      <p id="uploadStatus" style="color: var(--accent2); margin-top: 10px; font-size: 0.9rem;"></p>
+    <section class="hero">
+      <div>
+        <h2>The SoCal Spinoff, Streaming Free</h2>
+        <p class="lede">
+          A fresh group of West Coast basketball wives, girlfriends, fiancées and exes deal
+          with life in SoCal's hottest hub for gossip and game. Presented by VH1 — and every
+          season streams free on Pluto TV. This guide lists all 70 episodes with real
+          synopses; tap any episode and it opens right on Pluto TV.
+        </p>
+        <div class="meta-chips">
+          <span>REALITY</span><span>TV-14</span><span>5 SEASONS</span><span>42 MIN</span><span>VH1</span>
+        </div>
+        <div class="cta-row">
+          <a class="cta" href="https://pluto.tv/us/shows/basketball-wives-la/" target="_blank" rel="noopener">
+            ▶ Watch Free on Pluto TV
+          </a>
+          <a class="cta ghost" href="https://pluto.tv/us/shows/basketball-wives-la/season/1/" target="_blank" rel="noopener">
+            📺 Start Season 1
+          </a>
+        </div>
+      </div>
+      <figure class="hero-art" style="margin:0;">
+        <img src="assets/cast-s1.jpg" alt="Basketball Wives LA Season 1 cast — VH1 promotional art" />
+        <figcaption>The ladies of Season 1 — VH1 promotional art</figcaption>
+      </figure>
+    </section>
+
+    <div class="stream-note">
+      📡 <strong>No embedded player here.</strong> Playback happens on Pluto TV itself —
+      free with ads, no account needed. Pick any episode below and it opens on Pluto's
+      site ready to play. Mark episodes as watched to track your binge.
     </div>
 
-    <div class="player-section">
-      <h2 class="player-title" id="playerTitle">Select an episode to play</h2>
-
-      <div class="video-player-container">
-        <video id="mainVideo" controls>
-          <source src="" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-
-      <div class="nav-controls">
-        <button class="upload-btn" id="prevBtn">⏮ Previous</button>
-        <button class="upload-btn" id="nextBtn">⏭ Next</button>
-        <button class="upload-btn" id="watchedBtn">Mark as Watched</button>
-      </div>
-
-      <div class="video-info-panel" id="infoPanel" style="display: none;">
-        <div class="detail-row">
-          <span class="detail-label">Title:</span>
-          <span class="detail-value" id="infoTitle">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Season:</span>
-          <span class="detail-value" id="infoSeason">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Episode:</span>
-          <span class="detail-value" id="infoEpisode">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Air Date:</span>
-          <span class="detail-value" id="infoAirDate">—</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Cast:</span>
-          <span class="detail-value" id="infoCast">—</span>
-        </div>
-      </div>
-
-      <div class="stats" id="statsContainer" style="display: none;"></div>
-
-      <div class="description-box" id="descriptionBox" style="display: none;">
-        <strong>Episode Description:</strong><br /><span id="descriptionText"></span>
-      </div>
-    </div>
-
-    <h2 style="color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 40px;">
-      📺 Episode Library
+    <h2 style="color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0;">
+      📺 Episode Guide
     </h2>
 
     <div class="controls">
-      <input
-        type="text"
-        class="search-box"
-        id="searchBox"
-        placeholder="Search episodes, cast, or keywords..."
-      />
+      <input type="text" class="search-box" id="searchBox"
+        placeholder="Search episodes, storylines, or keywords..." />
       <select class="filter-select" id="seasonFilter">
         <option value="">All Seasons</option>
-        <option value="1">Season 1</option>
-        <option value="2">Season 2</option>
-        <option value="3">Season 3</option>
-        <option value="4">Season 4</option>
-        <option value="5">Season 5</option>
-        <option value="6">Season 6</option>
-      </select>
-      <select class="filter-select" id="sortSelect">
-        <option value="default">Sort: Episode Order</option>
-        <option value="views">Sort: Most Viewed</option>
-        <option value="title">Sort: Title</option>
+        <option value="1">Season 1 (2011)</option>
+        <option value="2">Season 2 (2012)</option>
+        <option value="3">Season 3 (2014)</option>
+        <option value="4">Season 4 (2015)</option>
+        <option value="5">Season 5 (2016)</option>
       </select>
     </div>
 
@@ -504,344 +459,197 @@
 
     <div class="video-grid" id="videoGrid"></div>
     <div class="no-results" id="noResults" style="display: none;">
-      No episodes found. Upload MP4 files or try a different search.
+      No episodes match that search. Try a different keyword or season.
     </div>
   </div>
 
   <footer>
     <p>
-      Basketball Wives LA © VH1 | MP4 Video Player | Local File Storage
+      Unofficial fan-made episode guide. All streaming happens on
+      <a href="https://pluto.tv/us/shows/basketball-wives-la/" target="_blank" rel="noopener" style="color: var(--accent2);">Pluto TV</a>,
+      free with ads.<br />
+      Basketball Wives LA © VH1 / Paramount Global. Not affiliated with Pluto TV, VH1, or Paramount.
     </p>
   </footer>
 
   <script>
-    // Simple deterministic PRNG so episode metadata is stable between reloads
-    const seededRandom = (seed) => {
-      let t = (seed + 0x6d2b79f5) | 0;
-      t = Math.imul(t ^ (t >>> 15), t | 1);
-      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
+    const SHOW_URL = "https://pluto.tv/us/shows/basketball-wives-la/";
+    const EP_URL = (id) => "https://pluto.tv/us/shows/2910104/episode/" + id + "/";
+    const SEASON_URL = (s) => SHOW_URL + "season/" + s + "/";
+    const THUMB = (id, shot) =>
+      "https://thumbnails.cbsig.net/_x/w600-q80/ptv/episodes/" + id + "/screenshot" + shot + ".jpg";
+    const FALLBACK_THUMB =
+      "https://wwwimage-us.plutostatic.tv/thumbnails/photos/w1920-q80/pplcrn/ptv/series/5d791411d53edd724951af0e/featuredImage_1780478281700.jpg?format=webp";
+    const YEAR = { 1: 2011, 2: 2012, 3: 2014, 4: 2015, 5: 2016 };
 
-    // Generate default 100 videos (metadata only) — episode counts total exactly 100
-    const generateVideoMetadata = () => {
-      const videos = [];
-      const seasons = [
-        { season: 1, episodes: 14 },
-        { season: 2, episodes: 16 },
-        { season: 3, episodes: 18 },
-        { season: 4, episodes: 18 },
-        { season: 5, episodes: 20 },
-        { season: 6, episodes: 14 },
-      ];
+    // [season, code, title, synopsis, pluto episode id (null = season-page link), screenshot crop]
+    // Episode data transcribed from Pluto TV's official episode listings.
+    const EPISODES = [
+      [1, 101, "Episode 1", "A fresh group of West Coast basketball wives, girlfriends, fiancées and exes deal with life in SoCal's hottest hub for gossip and game.", "5d791422d53edd724951b16d", "16_9"],
+      [1, 102, "Episode 2", "After a rooftop altercation between Malaysia and Laura, Tanya finds herself the surprise recipient of the group's disdain. Imani tries to keep a secret about one of the girls close to the vest -- but can't resist calling her \"worthless.\"", "5d791420d53edd724951b117", "16_9"],
+      [1, 103, "Episode 3", "Jackie prepares for her annual renewal of vows to Doug Christie, but will Draya make the cut for an invite? Jackie's bachelorette party nearly boils over when some surprise guests turn up the heat.", "5d791421d53edd724951b140", "16_9"],
+      [1, 104, "Episode 4", "Love is in the air at Jackie and Doug Christie's Vegas wedding, the 16th time they have tied the knot, but feathers are ruffled when one of the girls goes AWOL.", "5d791420d53edd724951b0ef", "4_3"],
+      [1, 105, "Episode 5", "The group takes Draya to task over sitting out Jackie's wedding, and Imani's frustration with the single life results in a new resolve to get back in the game.", "5d791422d53edd724951b18e", "16_9"],
+      [1, 106, "Episode 6", "Laura's issues with Draya turn the group's recreational MMA outing into a major showdown… but the heat really turns up when Jackie and Laura start digging up Draya's past online.", "5d79141ed53edd724951b0ba", "16_9"],
+      [1, 107, "Episode 7", "After reaching out to Malaysia, Draya is confused when Jackie suddenly decides she's her new best buddy. Also, Imani dives back into the dating pool, but can an ordinary Joe hold her interest?", "5d791414d53edd724951afca", "4_3"],
+      [1, 108, "Episode 8", "Jackie's penchant for gossip begins to wear on the girls. Also, a trip to Oakland has Gloria wondering about the future of her relationship with Matt.", "5d791414d53edd724951af59", "16_9"],
+      [1, 109, "Episode 9", "Matt and Gloria's charity golf event provides the backdrop for mounting friction between Draya and Laura. Also, is an upcoming trip just what the girls need or a terrible idea?", "5d791415d53edd724951b044", "16_9"],
+      [1, 110, "Episode 10", "The ladies are off to Hawaii for some fun in the sun, but the revelation that Jackie's been pitting them against each other heats up more than ever.", "5d791414d53edd724951af7e", "4_3"],
+      [1, 111, "Episode 11", "There's trouble in paradise as tempers flare and the ladies decide to call Jackie out on what they believe she's been saying behind their backs. Will the friction put an early end to the ladies' vacation in Hawaii?", "5d791415d53edd724951b01d", "4_3"],
+      [1, 112, "Finale", "Jackie's attempt to reconcile with the girls doesn't go as planned. Also, Matt and Gloria's relationship takes a turn no one saw coming.", "5d791413d53edd724951af30", "16_9"],
+      [1, 113, "Reunion (Part 1)", "The ladies are back to recap, rehash, and repair all the drama from this past season on Part 1 of the Basketball Wives: LA Reunion special.", null, null],
+      [1, 114, "Reunion (Part 2)", "The ladies are back to recap, rehash, and repair all the drama from this past season on Part 2 of the Basketball Wives: LA Reunion special.", null, null],
+      [2, 201, "Episode 1", "In the season two premiere, Malaysia's desire to bring Jackie back into the group has the ladies baffled. Also, Laura and Gloria find that despite being sisters, they've grown apart.", "5d79150ad53edd724951bccb", "4_3"],
+      [2, 202, "Episode 2", "Jackie's surprise appearance at Gloria's cooking party leaves a bad taste in everyone's mouth. Also, Gloria lands a plum acting role and Draya's behavior at a photo shoot irks newcomer Brooke.", "5d791500d53edd724951bc28", "16_9"],
+      [2, 203, "Episode 3", "Jackie's unique wedding plans and new tattoo raise eyebrows. Also, a phone call to Gloria tests Draya and Jackie's friendship.", "5d791508d53edd724951bca3", "16_9"],
+      [2, 204, "Episode 4", "The ladies gather for a pool party, but Draya's short temper sets Jackie off over the issue of respect. Also, Malaysia flubs a voiceover session and decides that overcoming her shyness is a top priority.", "5d791500d53edd724951bbdd", "4_3"],
+      [2, 205, "Episode 5", "The Christies forge ahead with their gay-themed wedding, Gloria and Laura have a wrenching heart-to-heart about growing distant, and Draya finally reaches her boiling point with Jackie.", "5d791508d53edd724951bc7e", "16_9"],
+      [2, 206, "Episode 6", "Tensions between Jackie and Draya hit an all-time high. Also, some of the other ladies consider not showing up for Jackie's upcoming annual wedding.", "5d791500d53edd724951bc4d", "16_9"],
+      [2, 207, "Episode 7", "Bambi confronts Laura on her treatment of Jackie. Also, Jackie and Doug's gay-themed wedding spectacular is nearly upstaged by one of the wives' choice of attire.", "5d791500d53edd724951bc02", "16_9"],
+      [2, 208, "Episode 8", "A surprise blowout at Laura and Gloria's mixology event shocks the group, and Jackie and Doug Christie's trip to Seattle gets off to a rough start when Jackie and her daughters get real during a visit with a family therapist.", "5d7914fad53edd724951bba3", "4_3"],
+      [2, 209, "Episode 9", "Jackie's suspicious of Laura's desire to speak with her daughters while in Seattle, and Draya, Brooke and Gloria's good time back in L.A. is interrupted by news of Matt's arrest.", "5d7914d1d53edd724951baf9", "4_3"],
+      [2, 210, "Episode 10", "It's hell on wheels at Malaysia's 80's-themed roller skating party. Laura is confronted about her treatment of Jackie. Gloria shoots an explosive scene from her web series and the girls discuss an upcoming trip to Fashion Week in NYC.", "5d7914d1d53edd724951ba89", "16_9"],
+      [2, 211, "Episode 11", "Good news for Brooke means bad news for her relationship with Draya. Also, Bambi reacts when Gloria shuts her down during an argument.", "5d7914d1d53edd724951ba64", "4_3"],
+      [2, 212, "Episode 12", "The ladies head to the Big Apple to walk the runway for Jackie's clothing line. More than flash bulbs and champagne corks start popping when Draya bails on a party to celebrate Brooke landing a major magazine cover.", "5d7914d1d53edd724951baae", "16_9"],
+      [2, 213, "Episode 13", "More SoCal drama — stream this episode free on Pluto TV.", null, null],
+      [2, 214, "Episode 14", "More SoCal drama — stream this episode free on Pluto TV.", null, null],
+      [2, 215, "Episode 15", "More SoCal drama — stream this episode free on Pluto TV.", null, null],
+      [2, 216, "Episode 16", "More SoCal drama — stream this episode free on Pluto TV.", null, null],
+      [3, 301, "Episode 301", "Jackie invites some ladies of the league to meet and plan an event, but as the new girls get to know each other, the claws come out, and when the focus turns to Draya, it all goes left.", "5d79147fd53edd724951b70e", "4_3"],
+      [3, 302, "Episode 302", "Brittish is determined to give it another shot and throws a \"Turkish Tea Party\" for the group. Meanwhile, Brandi's time to have another baby is running out, so she and her husband Jason seek the help of a fertility specialist.", "5d79147fd53edd724951b6e9", "16_9"],
+      [3, 303, "Episode 303", "Things are getting serious with Draya and her boyfriend Orlando Scandrick, but Jackie's daughter has news that may rock Draya's world. Meanwhile, Brittish's fiancé Lorenzo Gordon gets advice from Jackie's husband, Doug Christie.", "5d79147dd53edd724951b6c1", "4_3"],
+      [3, 304, "Episode 304", "Draya confronts her boyfriend about accusations of possible infidelity with Jackie's daughter, Chantel. Jackie's gala event falls apart when almost none of her friends show up and Brittish gets into an altercation with Malaysia.", "5d79145fd53edd724951b539", "16_9"],
+      [3, 305, "Episode 305", "With the group still reeling from the effects of Jackie's event, Sundy decides the ladies need a getaway to Palm Springs—but for the good of the group, Brittish is not invited.", "5d791464d53edd724951b5fd", "16_9"],
+      [3, 306, "Episode 306", "The Palm Springs getaway is anything but relaxing as tensions between Draya and Sundy erupt into full-blown mayhem. And in a tearful confession, Draya tells Jackie her daughter may not be as innocent as she thinks.", "5d791460d53edd724951b5a7", "16_9"],
+      [3, 307, "Episode 307", "Jackie develops a bottle for the cognac brand she hopes to launch. As payback for Palm Springs, Draya hosts all the ladies at an excruciating Mud Run. And Jackie forces a meeting with Draya to clear her daughter's name.", "5d791460d53edd724951b561", "4_3"],
+      [3, 308, "Episode 308", "Jackie and Chantel are over the situation with Draya and her boyfriend, but Draya and Orlando aren't done yet-- they confront the ladies in an attempt to put the issue to rest. Jackie invites the group on a trip to France.", "5d791466d53edd724951b623", "16_9"],
+      [3, 309, "Episode 309", "The ladies head to France to launch Jackie's cognac, but divisions in the group threaten to spoil the trip and may be the end of Jackie and Malaysia's friendship.", "5d791460d53edd724951b5cc", "4_3"],
+      [3, 310, "Episode 310", "While in France, Jackie launches her cognac, Brittish gets a surprise present from her fiancé, Lorenzo, and Sundy's attempt to reconcile Malaysia and Jackie takes a nasty turn that ends up splintering the entire group.", "5d791466d53edd724951b649", "16_9"],
+      [3, 311, "Reunion", "Join us for the most dramatic Reunion Special yet! Things get heated with Sundy and Brandi. Jackie reveals her thoughts about the Orlando/Draya/Chantel love triangle and one cast member refuses to share the stage with the girls.", "5d791460d53edd724951b586", "16_9"],
+      [4, 401, "Episode 1", "Jackie desperately tries to work her way back into the group's good graces. At Draya's 1st ever fashion show, new girl Mehgan introduces herself; but Draya, Brandi and Malaysia are skeptical since they know she's friends with Jackie.", "5d7914b9d53edd724951b985", "4_3"],
+      [4, 402, "Episode 2", "Jackie shoots her 1st commercial and is overwhelmed by the chaos of directing. Mehgan and new friend Patrice support Jackie's endeavor, but later Mehgan starts calling Patrice \"evil\". Besties Draya & Malaysia fight for the 1st time.", "5d7914b9d53edd724951b9aa", "16_9"],
+      [4, 403, "Episode 3", "Malaysia meets Jackie to discuss their issues. Shaunie O'Neal joins the group and learns of the heavy drama. Draya has critical thoughts on Mehgan's performance in Jackie's commercial, which Mehgan hears at the commercial premiere.", "5d7914b9d53edd724951b960", "16_9"],
+      [4, 404, "Episode 4", "Malaysia meets Jackie to discuss their issues. Shaunie O'Neal joins the group and learns of the heavy drama. Draya has critical thoughts on Mehgan's performance in Jackie's commercial, which Mehgan hears at the commercial premiere.", "5d7914b4d53edd724951b92d", "16_9"],
+      [4, 405, "Episode 5", "It's time for a weekend away in Santa Barbara and at a pre-party lunch, Jackie lets loose with every drink she can get her hands on. Draya gets the side eye when she introduces her \"real\" friend, Angel, to the group.", "5d7914a6d53edd724951b8db", "16_9"],
+      [4, 406, "Episode 6", "Santa Barbara comes to a dramatic end when Draya prompts Mehgan to question Jackie's loyalty. Jackie's actions towards Mehgan may prove unforgivable but, back in LA, Jackie puts the blame for all the group drama on Draya.", "5d791491d53edd724951b819", "4_3"],
+      [4, 407, "Episode 7", "Brandi and Mehgan bond over their hatred of crazy Jackie, and Mehgan plots her revenge for getting spit on.", "5d79148fd53edd724951b7c7", "4_3"],
+      [4, 408, "Episode 8", "Draya says some unforgivable things that leave her fledgling friendships on the line. Brandi and husband Jason try to reconcile their differences in couples therapy, but have Jason's actions caused too much damage to Brandi's heart?", "5d791491d53edd724951b7f4", "4_3"],
+      [4, 409, "Episode 9", "Brandi wins the group's support when the truth about Draya is revealed. Angel styles Malaysia at her luxury bedding photo shoot, but tensions arise when Malaysia disses Angel's risqué lingerie line.", "5d791493d53edd724951b88a", "16_9"],
+      [4, 410, "Episode 10", "Malaysia refuses to stand for Jackie's underhanded comments and kicks her out of her party. Shaunie invites the girls to her son's clothing line launch and hopes to bring some resolve to the group now that Draya is gone.", "5d791493d53edd724951b841", "4_3"],
+      [4, 411, "Episode 11", "Angel attempts to defend her character but is quickly put in the hot seat when Malaysia and Mehgan come for her. Jackie and Malaysia grow sick of their differences and try to use this vacation to finally mend fences.", "5d79148dd53edd724951b79b", "4_3"],
+      [4, 412, "Episode 12", "Mehgan finally pushes Angel to her breaking point and a second beach brawl ignites when Brandi and Malaysia confront the Miami ladies, Tami and Shaunie, because of some assumed giggling.", "5d79148cd53edd724951b772", "4_3"],
+      [4, 413, "Episode 13", "The season wraps — stream this episode free on Pluto TV.", null, null],
+      [5, 501, "Episode 1", "Brandi questions whether to return to LA. Jackie's husband Doug Christie is being offered a new job. Angel Brinks and Malaysia have drama over their dress-related beef. Tami Roman is in town with the hopes of having a baby.", "5d791445d53edd724951b455", "16_9"],
+      [5, 502, "Episode 2", "Brandi throws a Welcome to L.A. party for her \"sister\" Duffey but Malaysia's attitude is anything but welcoming. Brandi's ex Jason returns hoping to rekindle their relationship. Jackie surprises Doug with a downtown condo.", "5d791445d53edd724951b47a", "16_9"],
+      [5, 503, "Episode 3", "Brandi must defend Malaysia's behavior to \"sister\" Duffey. Malaysia and Angel Brinks attempt to put their feud to rest. Angel Brinks holds a launch party for her clothing line, but drama threatens to derail the event.", "5d791447d53edd724951b4ac", "4_3"],
+      [5, 504, "Episode 4", "Brandi goes off on Angel Love for voicing her opinion. When Malaysia defends her bestie Brandi, Duffey's opinion about Malaysia changes for the better. Jackie convinces Shaunie and Brandi to hash out their problems.", "5d791445d53edd724951b3e6", "16_9"],
+      [5, 505, "Episode 5", "Malaysia proposes a ladies \"peace trip\" to Big Bear Lake CA. Angel Brinks's relationship with her baby daddy is called into question. Angel Love comes at Malaysia for rolling up on her at Brinks's party.", "5d791444d53edd724951b398", "16_9"],
+      [5, 506, "Episode 6", "At Big Bear Lake Angel Love goes head-to-head with Malaysia, Brandi and Duffey. Duffey offers to direct a music video for Tami's daughter Jazz. Jackie tries to broker peace between Duffey and Love but makes matters worse.", "5d791445d53edd724951b430", "4_3"],
+      [5, 507, "Episode 7", "Angel Brinks plans her clothing line anniversary party but it turns into a circus. Tami and Duffey collaborate on Jazz's music video but their visions don't match. Doug breaks the news to Jackie that he is taking a coaching position.", "5d791445d53edd724951b3c0", "16_9"],
+      [5, 508, "Episode 8", "Angel Brinks hosts a star-studded event for the anniversary of her clothing company but Jackie's erratic behavior makes it a night to remember. Tami and Reggie visit a fertility doctor, and Jackie seeks the advice of an energy healer.", "5d791445d53edd724951b40b", "4_3"],
+      [5, 509, "Episode 9", "Jackie's display at Angel Brinks's party causes a rift. Brandi and Duffey plan a BBQ to get to the bottom of Jackie's behavior. Tami confronts Duffey about her daughter's music video and makes a drastic decision.", "5d79142fd53edd724951b2b5", "16_9"],
+      [5, 510, "Episode 10", "Tami fires Duffey from her daughter's music video. Angel Brinks and Angel Love have it out with Jackie after her breakdown at Angel Brinks's party. Tami hustles to finish her daughter's music video in time for the release party.", "5d79142fd53edd724951b224", "4_3"],
+      [5, 511, "Episode 11", "Tami gets some scandalous information from a friend. Jackie tries to lose weight in order to keep Doug interested. At Tami's daughter's video release party, Angel Brinks gets blindsided and Jackie finds herself in the line of fire.", "5d79142fd53edd724951b26b", "16_9"],
+      [5, 512, "Episode 12", "Jackie asks Malaysia to be by her side during a very personal weight loss procedure. Duffey apologizes to Tami's daughter in an attempt to make things right with Tami. Doug takes Jackie on a romantic date and reveals a huge surprise.", "5d79142fd53edd724951b2db", "16_9"],
+      [5, 513, "Episode 13", "The final season's closing drama — stream this episode free on Pluto TV.", null, null],
+      [5, 514, "Episode 14", "The final season's closing drama — stream this episode free on Pluto TV.", null, null],
+      [5, 515, "Episode 15", "The final season's closing drama — stream this episode free on Pluto TV.", null, null],
+      [5, 516, "Episode 16", "The final season's closing drama — stream this episode free on Pluto TV.", null, null],
+    ].map(([season, code, title, desc, id, shot]) => ({
+      season,
+      code,
+      title,
+      desc,
+      url: id ? EP_URL(id) : SEASON_URL(season),
+      thumb: id ? THUMB(id, shot) : FALLBACK_THUMB,
+      key: season + "-" + code,
+    }));
 
-      const descriptions = [
-        "Drama unfolds as cast members confront each other about recent betrayals.",
-        "A surprise party goes wrong when tensions boil over between longtime friends.",
-        "Fashion meets function as the ladies prepare for a glamorous charity event.",
-        "New alliances form while old friendships are tested to their limits.",
-        "Behind-the-scenes drama escalates as secrets come to light.",
-        "The cast celebrates a milestone while navigating personal challenges.",
-        "Love and loyalty are questioned in this explosive episode.",
-        "A heated confrontation leads to unexpected revelations.",
-        "The ladies plan their ultimate vacation destination.",
-        "Family drama intersects with cast dynamics in surprising ways.",
-      ];
-
-      let videoId = 1;
-
-      seasons.forEach(({ season, episodes }) => {
-        for (let ep = 1; ep <= episodes && videoId <= 100; ep++) {
-          const castList = [
-            "Shaunie O'Neal",
-            "Gloria Govan",
-            "Draya Michele",
-            "Tami Roman",
-            "Malaysia Pargo",
-            "Brooke Bailey",
-          ];
-          const month = Math.floor(seededRandom(videoId * 13) * 12);
-          const day = 1 + Math.floor(seededRandom(videoId * 31) * 28);
-
-          videos.push({
-            id: videoId,
-            season,
-            episode: ep,
-            title: `Season ${season}, Episode ${ep}`,
-            description: descriptions[(videoId - 1) % descriptions.length],
-            airDate: new Date(2011 + season, month, day).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            }),
-            cast: castList[Math.floor(seededRandom(videoId * 101) * castList.length)],
-            views: 50000 + Math.floor(seededRandom(videoId * 7) * 450000),
-            mp4Url: null,
-            fileName: null,
-          });
-          videoId++;
-        }
-      });
-
-      return videos;
-    };
-
-    let allVideos = generateVideoMetadata();
-    let filteredVideos = [...allVideos];
-    let currentVideo = null;
-
-    // Watched-episode tracking (persists across reloads)
-    const WATCHED_KEY = "bbla-watched";
+    // Watched tracking (persists across reloads)
+    const WATCHED_KEY = "bbla-watched-v2";
     let watched = new Set(JSON.parse(localStorage.getItem(WATCHED_KEY) || "[]"));
     const saveWatched = () => localStorage.setItem(WATCHED_KEY, JSON.stringify([...watched]));
 
     const videoGrid = document.getElementById("videoGrid");
     const searchBox = document.getElementById("searchBox");
     const seasonFilter = document.getElementById("seasonFilter");
-    const sortSelect = document.getElementById("sortSelect");
-    const mainVideo = document.getElementById("mainVideo");
-    const playerTitle = document.getElementById("playerTitle");
-    const infoPanel = document.getElementById("infoPanel");
-    const fileInput = document.getElementById("fileInput");
-    const uploadStatus = document.getElementById("uploadStatus");
     const noResults = document.getElementById("noResults");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const watchedBtn = document.getElementById("watchedBtn");
     const libraryStats = document.getElementById("libraryStats");
-    const uploadSection = document.querySelector(".upload-section");
 
-    const renderVideos = (videos) => {
-      videoGrid.innerHTML = "";
-      noResults.style.display = videos.length === 0 ? "block" : "none";
-
-      videos.forEach((video) => {
-        const card = document.createElement("div");
-        card.className = "video-card";
-        card.innerHTML = `
-          <div class="video-thumbnail"></div>
-          <div class="video-info">
-            <h3 class="video-title">${video.title}</h3>
-            <p class="video-meta">
-              Cast: ${video.cast}<br/>
-              Air Date: ${video.airDate}<br/>
-              Views: ${video.views.toLocaleString()}
-            </p>
-            <div class="tag-row">
-              <span class="season-tag">S${video.season}E${video.episode}</span>
-              ${video.mp4Url ? '<span class="mp4-tag" title="' + (video.fileName || "MP4 loaded") + '">🎞 MP4</span>' : ""}
-              ${watched.has(video.id) ? '<span class="watched-tag">✓ WATCHED</span>' : ""}
-            </div>
-          </div>
-        `;
-        card.addEventListener("click", () => playVideo(video));
-        videoGrid.appendChild(card);
-      });
-    };
-
-    const playVideo = (video) => {
-      currentVideo = video;
-      playerTitle.textContent = video.title;
-      watchedBtn.textContent = watched.has(video.id) ? "✓ Watched" : "Mark as Watched";
-
-      if (video.mp4Url) {
-        mainVideo.src = video.mp4Url;
-        uploadStatus.textContent = "";
-        mainVideo.play().catch(() => {
-          console.log("Autoplay blocked");
-        });
-      } else {
-        mainVideo.removeAttribute("src");
-        mainVideo.load();
-        uploadStatus.textContent = "⚠️ No MP4 file uploaded for this episode. Upload a file to play.";
-        uploadStatus.style.color = "#fbbf24";
-      }
-
-      document.getElementById("infoTitle").textContent = video.title;
-      document.getElementById("infoSeason").textContent = `Season ${video.season}`;
-      document.getElementById("infoEpisode").textContent = `Episode ${video.episode}`;
-      document.getElementById("infoAirDate").textContent = video.airDate;
-      document.getElementById("infoCast").textContent = video.cast;
-      document.getElementById("descriptionText").textContent = video.description;
-
-      document.getElementById("statsContainer").innerHTML = `
-        <div class="stat-box">
-          <div class="stat-number">${video.views.toLocaleString()}</div>
-          <div class="stat-label">Views</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number">${video.season}</div>
-          <div class="stat-label">Season</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number">${video.episode}</div>
-          <div class="stat-label">Episode</div>
-        </div>
+    const renderStats = (shown) => {
+      libraryStats.innerHTML = `
+        <span class="chip">📚 ${EPISODES.length} episodes · 5 seasons</span>
+        <span class="chip">🔎 ${shown} shown</span>
+        <span class="chip">✅ ${watched.size} watched</span>
       `;
-
-      infoPanel.style.display = "block";
-      document.getElementById("statsContainer").style.display = "grid";
-      document.getElementById("descriptionBox").style.display = "block";
     };
 
-    const filterVideos = () => {
-      const searchTerm = searchBox.value.toLowerCase();
+    const render = () => {
+      const term = searchBox.value.toLowerCase();
       const seasonTerm = seasonFilter.value;
-      const sortTerm = sortSelect.value;
 
-      filteredVideos = allVideos.filter((video) => {
+      const list = EPISODES.filter((ep) => {
         const matchesSearch =
-          video.title.toLowerCase().includes(searchTerm) ||
-          video.description.toLowerCase().includes(searchTerm) ||
-          video.cast.toLowerCase().includes(searchTerm);
-
-        const matchesSeason = seasonTerm === "" || video.season == seasonTerm;
-
+          ep.title.toLowerCase().includes(term) ||
+          ep.desc.toLowerCase().includes(term) ||
+          String(ep.code).includes(term);
+        const matchesSeason = seasonTerm === "" || ep.season == seasonTerm;
         return matchesSearch && matchesSeason;
       });
 
-      if (sortTerm === "views") {
-        filteredVideos.sort((a, b) => b.views - a.views);
-      } else if (sortTerm === "title") {
-        filteredVideos.sort((a, b) =>
-          a.title.localeCompare(b.title, undefined, { numeric: true })
-        );
-      }
+      videoGrid.innerHTML = "";
+      noResults.style.display = list.length === 0 ? "block" : "none";
 
-      renderVideos(filteredVideos);
-    };
-
-    const updateLibraryStats = () => {
-      const loaded = allVideos.filter((v) => v.mp4Url).length;
-      libraryStats.innerHTML = `
-        <span class="chip">📚 ${allVideos.length} episodes</span>
-        <span class="chip">🎞 ${loaded} MP4 loaded</span>
-        <span class="chip">✓ ${watched.size} watched</span>
-      `;
-    };
-
-    // File upload handling (file input + drag & drop)
-    const handleFiles = (fileList) => {
-      const candidates = Array.from(fileList).filter(
-        (f) => f.type === "video/mp4" || f.name.toLowerCase().endsWith(".mp4")
-      );
-
-      if (!candidates.length) {
-        uploadStatus.textContent = "⚠️ No MP4 files detected. Please choose .mp4 files.";
-        uploadStatus.style.color = "#fbbf24";
-        return;
-      }
-
-      let assigned = 0;
-      // Fill the currently selected episode first, then open slots in order
-      let target = currentVideo && !currentVideo.mp4Url ? currentVideo : null;
-
-      candidates.forEach((file) => {
-        const video = target || allVideos.find((v) => !v.mp4Url);
-        target = null;
-        if (!video) return;
-        video.mp4Url = URL.createObjectURL(file);
-        video.fileName = file.name;
-        assigned++;
+      list.forEach((ep) => {
+        const card = document.createElement("a");
+        card.className = "video-card";
+        card.href = ep.url;
+        card.target = "_blank";
+        card.rel = "noopener";
+        card.title = "Watch on Pluto TV";
+        card.innerHTML = `
+          <div class="video-thumbnail">
+            <img src="${ep.thumb}" alt="Basketball Wives LA S${ep.season} E${ep.code}" loading="lazy"
+                 onerror="this.onerror=null;this.src='${FALLBACK_THUMB}';" />
+            <div class="play-overlay">▶</div>
+          </div>
+          <div class="video-info">
+            <h3 class="video-title">${ep.title}</h3>
+            <p class="video-desc">${ep.desc}</p>
+            <div class="card-footer">
+              <div class="tag-row">
+                <span class="season-tag">S${ep.season} · E${ep.code}</span>
+                <span class="year-tag">${YEAR[ep.season]}</span>
+                ${watched.has(ep.key) ? '<span class="watched-tag">✓ WATCHED</span>' : ""}
+              </div>
+              <button class="watched-btn ${watched.has(ep.key) ? "done" : ""}" data-key="${ep.key}">
+                ${watched.has(ep.key) ? "✓ Watched" : "Mark watched"}
+              </button>
+            </div>
+          </div>
+        `;
+        videoGrid.appendChild(card);
       });
 
-      const skipped = candidates.length - assigned;
-      uploadStatus.textContent =
-        `✅ ${assigned} MP4 file(s) added` +
-        (skipped > 0 ? ` — ${skipped} skipped (all episode slots are filled).` : ".");
-      uploadStatus.style.color = assigned > 0 ? "#10b981" : "#fbbf24";
-
-      renderVideos(filteredVideos);
-      updateLibraryStats();
+      renderStats(list.length);
     };
 
-    fileInput.addEventListener("change", (e) => {
-      handleFiles(e.target.files);
-      fileInput.value = "";
-    });
-
-    ["dragenter", "dragover"].forEach((evt) =>
-      uploadSection.addEventListener(evt, (e) => {
-        e.preventDefault();
-        uploadSection.classList.add("drag-over");
-      })
-    );
-    ["dragleave", "drop"].forEach((evt) =>
-      uploadSection.addEventListener(evt, (e) => {
-        e.preventDefault();
-        uploadSection.classList.remove("drag-over");
-      })
-    );
-    uploadSection.addEventListener("drop", (e) => {
-      handleFiles(e.dataTransfer.files);
-    });
-
-    const clearAllVideos = () => {
-      allVideos.forEach((video) => {
-        if (video.mp4Url) {
-          URL.revokeObjectURL(video.mp4Url);
-          video.mp4Url = null;
-          video.fileName = null;
-        }
-      });
-      mainVideo.removeAttribute("src");
-      mainVideo.load();
-      uploadStatus.textContent = "🗑️ All videos cleared.";
-      uploadStatus.style.color = "#ef4444";
-      renderVideos(filteredVideos);
-      updateLibraryStats();
-    };
-
-    // Episode navigation + auto-advance
-    const getListForNav = () => (filteredVideos.length ? filteredVideos : allVideos);
-
-    const navigate = (offset) => {
-      const list = getListForNav();
-      if (!currentVideo) {
-        if (list.length) playVideo(list[0]);
-        return;
-      }
-      const idx = list.findIndex((v) => v.id === currentVideo.id);
-      const target = list[idx + offset];
-      if (target) playVideo(target);
-    };
-
-    prevBtn.addEventListener("click", () => navigate(-1));
-    nextBtn.addEventListener("click", () => navigate(1));
-
-    mainVideo.addEventListener("ended", () => {
-      if (!currentVideo) return;
-      watched.add(currentVideo.id);
+    videoGrid.addEventListener("click", (e) => {
+      const btn = e.target.closest(".watched-btn");
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const key = btn.dataset.key;
+      if (watched.has(key)) watched.delete(key);
+      else watched.add(key);
       saveWatched();
-      watchedBtn.textContent = "✓ Watched";
-
-      // Auto-advance to the next episode that has an MP4 loaded
-      const list = getListForNav();
-      const idx = list.findIndex((v) => v.id === currentVideo.id);
-      const nextLoaded = list.slice(idx + 1).find((v) => v.mp4Url);
-      if (nextLoaded) playVideo(nextLoaded);
-
-      renderVideos(filteredVideos);
-      updateLibraryStats();
+      render();
     });
 
-    watchedBtn.addEventListener("click", () => {
-      if (!currentVideo) return;
-      if (watched.has(currentVideo.id)) watched.delete(currentVideo.id);
-      else watched.add(currentVideo.id);
-      saveWatched();
-      watchedBtn.textContent = watched.has(currentVideo.id) ? "✓ Watched" : "Mark as Watched";
-      renderVideos(filteredVideos);
-      updateLibraryStats();
-    });
+    searchBox.addEventListener("input", render);
+    seasonFilter.addEventListener("change", render);
 
-    searchBox.addEventListener("input", filterVideos);
-    seasonFilter.addEventListener("change", filterVideos);
-    sortSelect.addEventListener("change", filterVideos);
-
-    // Initial render
-    renderVideos(allVideos);
-    updateLibraryStats();
+    render();
   </script>
 </body>
 </html>
