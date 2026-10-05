@@ -1,0 +1,18 @@
+{
+  "name": "basketball-wives-la",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Basketball Wives LA — 100 episode metadata library with a fully local MP4/WebM video player. Single-file app, no build step, no network calls.",
+  "scripts": {
+    "start": "python3 -m http.server 8000 --bind 0.0.0.0",
+    "test": "npm run test:data && npm run test:dom",
+    "test:data": "node tests/data.test.js",
+    "test:dom": "node tests/dom.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

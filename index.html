@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basketball Wives LA - MP4 Video Player</title>
+  <title>Basketball Wives LA — 100 Episode Library &amp; MP4 Player</title>
   <style>
     :root {
       --bg1: #0a0e27;
@@ -15,16 +15,20 @@
       --card-bg: rgba(26, 31, 58, 0.8);
       --panel: rgba(10, 14, 39, 0.9);
       --shadow: rgba(0, 0, 0, 0.5);
+      --ok: #10b981;
+      --warn: #fbbf24;
+      --bad: #ef4444;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
-      font-family: "Arial", sans-serif;
+      font-family: "Arial", "Helvetica Neue", sans-serif;
       background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+      background-attachment: fixed;
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
@@ -32,7 +36,7 @@
 
     header {
       background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
-      padding: 24px;
+      padding: 22px;
       text-align: center;
       box-shadow: 0 8px 32px var(--shadow);
       position: sticky;
@@ -42,7 +46,7 @@
 
     header h1 {
       margin: 0;
-      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-size: clamp(1.6rem, 5vw, 2.6rem);
       text-transform: uppercase;
       letter-spacing: 0.15em;
       color: white;
@@ -51,33 +55,170 @@
 
     header p {
       margin: 8px 0 0;
-      font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.92rem;
+      color: rgba(255, 255, 255, 0.92);
       letter-spacing: 0.08em;
     }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 32px 20px;
+    .container { max-width: 1400px; margin: 0 auto; padding: 28px 20px 48px; }
+
+    section { margin-bottom: 32px; }
+
+    h2.section-title {
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 1.3rem;
+      margin: 0 0 16px;
     }
 
+    /* ---------- summary bar ---------- */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      background: var(--panel);
+      border: 1px solid rgba(0, 217, 255, 0.25);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .summary .stat-box { background: rgba(0, 217, 255, 0.08); }
+
+    .persist-note {
+      grid-column: 1 / -1;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ---------- dropzone ---------- */
+    .upload-section {
+      background: rgba(255, 20, 147, 0.09);
+      border: 2px dashed var(--accent);
+      border-radius: 16px;
+      padding: 26px;
+      text-align: center;
+      transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .upload-section.dragover {
+      background: rgba(255, 20, 147, 0.22);
+      border-color: var(--accent2);
+      transform: scale(1.01);
+    }
+
+    .upload-section h3 { color: var(--accent2); margin: 0 0 6px; }
+
+    .upload-section .hint { color: var(--text-muted); margin: 0 0 16px; font-size: 0.92rem; }
+
+    .file-input { display: none; }
+
+    .btn {
+      display: inline-block;
+      padding: 11px 20px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border: none;
+      color: white;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: bold;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      margin: 6px 4px;
+    }
+
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 20, 147, 0.4); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn.ghost {
+      background: transparent;
+      border: 2px solid var(--accent2);
+      color: var(--accent2);
+    }
+
+    .btn.ghost:hover { background: rgba(0, 217, 255, 0.12); box-shadow: 0 6px 18px rgba(0, 217, 255, 0.25); }
+
+    .btn.danger { background: linear-gradient(90deg, #7f1d1d, var(--bad)); }
+
+    .btn.small { padding: 6px 12px; font-size: 0.8rem; border-radius: 9px; margin: 0; }
+
+    .btn:focus-visible, .video-card:focus-visible, .mini-card:focus-visible, select:focus-visible, input:focus-visible {
+      outline: 3px solid var(--accent2);
+      outline-offset: 2px;
+    }
+
+    /* ---------- import queue ---------- */
+    .queue { margin-top: 18px; text-align: left; display: none; }
+    .queue.active { display: block; }
+
+    .queue-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 12px;
+      align-items: center;
+      background: rgba(10, 14, 39, 0.75);
+      border: 1px solid rgba(255, 20, 147, 0.25);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .queue-name { font-size: 0.9rem; word-break: break-all; }
+    .queue-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+    .queue-bar { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, 0.12); margin-top: 8px; overflow: hidden; }
+    .queue-bar > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.3s ease; }
+
+    .status-line { margin-top: 12px; font-size: 0.9rem; color: var(--accent2); min-height: 1.2em; }
+
+    /* ---------- continue watching ---------- */
+    .rail { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 10px; }
+    .rail::-webkit-scrollbar { height: 8px; }
+    .rail::-webkit-scrollbar-thumb { background: rgba(255, 20, 147, 0.5); border-radius: 99px; }
+
+    .mini-card {
+      flex: 0 0 260px;
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 217, 255, 0.25);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      text-align: left;
+      color: inherit;
+      font: inherit;
+      padding: 0;
+    }
+
+    .mini-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+
+    .mini-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, #2b2f4a, #141833); }
+    .mini-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .mini-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(0, 0, 0, 0.55); }
+    .mini-progress > span { display: block; height: 100%; background: var(--accent); }
+    .mini-body { padding: 10px 12px; }
+    .mini-title { font-size: 0.85rem; font-weight: bold; color: var(--accent2); margin: 0 0 4px; }
+    .mini-sub { font-size: 0.76rem; color: var(--text-muted); margin: 0; }
+
+    /* ---------- player ---------- */
     .player-section {
       background: var(--panel);
       border: 2px solid var(--accent);
       border-radius: 20px;
-      padding: 32px;
-      margin-bottom: 40px;
+      padding: 26px;
       box-shadow: 0 15px 50px var(--shadow);
     }
 
-    .player-title {
-      font-size: 1.8rem;
-      color: var(--accent2);
-      margin: 0 0 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
+    .player-head { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; margin-bottom: 18px; }
+
+    .player-title { font-size: clamp(1.2rem, 3vw, 1.7rem); color: var(--accent2); margin: 0; text-transform: uppercase; letter-spacing: 0.06em; }
+    .player-sub { margin: 6px 0 0; color: var(--text-muted); font-size: 0.9rem; }
+
+    .player-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
     .video-player-container {
       width: 100%;
@@ -85,186 +226,57 @@
       background: #000;
       border-radius: 16px;
       overflow: hidden;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       box-shadow: 0 10px 30px var(--shadow);
+      position: relative;
     }
 
-    video {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
+    video { width: 100%; height: 100%; display: block; background: #000; }
 
-    .controls {
+    .empty-stage {
+      position: absolute;
+      inset: 0;
       display: flex;
-      gap: 12px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .search-box {
-      flex: 1;
-      min-width: 220px;
-      padding: 12px 16px;
-      border: 2px solid var(--accent);
-      border-radius: 12px;
-      background: var(--card-bg);
-      color: var(--text);
-      font-size: 1rem;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .search-box:focus {
-      box-shadow: 0 0 20px var(--accent);
-      border-color: var(--accent2);
-    }
-
-    .filter-select {
-      padding: 12px 16px;
-      border: 2px solid var(--accent2);
-      border-radius: 12px;
-      background: var(--card-bg);
-      color: var(--text);
-      font-size: 1rem;
-      cursor: pointer;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-
-    .filter-select:hover {
-      box-shadow: 0 0 15px var(--accent2);
-    }
-
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-
-    .video-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(255, 20, 147, 0.2);
-      border-radius: 16px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px var(--shadow);
-    }
-
-    .video-card:hover {
-      transform: translateY(-8px);
-      border-color: var(--accent);
-      box-shadow: 0 12px 32px rgba(255, 20, 147, 0.3);
-    }
-
-    .video-thumbnail {
-      width: 100%;
-      height: 160px;
-      background: linear-gradient(135deg, #333, #555);
-      display: flex;
+      flex-direction: column;
+      gap: 10px;
       align-items: center;
       justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .video-thumbnail::before {
-      content: "▶";
-      font-size: 3rem;
-      color: var(--accent);
-      opacity: 0.6;
-      transition: all 0.3s ease;
-    }
-
-    .video-card:hover .video-thumbnail::before {
-      opacity: 1;
-      transform: scale(1.2);
-    }
-
-    .video-info {
-      padding: 16px;
-    }
-
-    .video-title {
-      font-weight: bold;
-      font-size: 0.95rem;
-      margin: 0 0 8px;
-      color: var(--accent2);
-      line-height: 1.4;
-    }
-
-    .video-meta {
-      font-size: 0.85rem;
+      text-align: center;
+      padding: 20px;
       color: var(--text-muted);
-      margin: 0;
-      line-height: 1.5;
+      background: radial-gradient(circle at 50% 40%, rgba(255, 20, 147, 0.16), transparent 65%), #05070f;
     }
 
-    .season-tag {
-      display: inline-block;
-      background: var(--accent);
-      color: white;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      margin-top: 8px;
-    }
+    .empty-stage strong { color: var(--text); font-size: 1.05rem; }
+
+    .toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; user-select: none; }
+    .toggle input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
 
     .video-info-panel {
       background: rgba(255, 20, 147, 0.1);
       border-left: 4px solid var(--accent);
-      padding: 20px;
+      padding: 18px 20px;
       border-radius: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
-    .detail-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 12px;
-      font-size: 0.95rem;
-    }
+    .detail-row { display: flex; gap: 16px; margin-bottom: 10px; font-size: 0.94rem; flex-wrap: wrap; }
+    .detail-row:last-child { margin-bottom: 0; }
+    .detail-label { color: var(--accent2); font-weight: bold; min-width: 120px; }
+    .detail-value { color: var(--text); }
 
-    .detail-label {
-      color: var(--accent2);
-      font-weight: bold;
-      min-width: 120px;
-    }
-
-    .detail-value {
-      color: var(--text);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin-bottom: 18px; }
 
     .stat-box {
       background: rgba(0, 217, 255, 0.1);
-      border: 1px solid var(--accent2);
-      padding: 16px;
+      border: 1px solid rgba(0, 217, 255, 0.45);
+      padding: 14px;
       border-radius: 12px;
       text-align: center;
     }
 
-    .stat-number {
-      font-size: 1.8rem;
-      color: var(--accent2);
-      font-weight: bold;
-    }
-
-    .stat-label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
+    .stat-number { font-size: 1.6rem; color: var(--accent2); font-weight: bold; line-height: 1.1; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
 
     .description-box {
       color: var(--text-muted);
@@ -273,115 +285,295 @@
       padding: 16px;
       background: rgba(0, 217, 255, 0.05);
       border-radius: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
-    .no-results {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-      font-size: 1.1rem;
+    .kbd-hints { font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.9; }
+    kbd {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 1px 7px;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 0.78rem;
+      color: var(--text);
     }
 
-    .upload-section {
-      background: rgba(255, 20, 147, 0.1);
-      border: 2px dashed var(--accent);
-      border-radius: 16px;
-      padding: 32px;
-      text-align: center;
-      margin-bottom: 40px;
-    }
+    /* ---------- controls / filters ---------- */
+    .controls { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
 
-    .upload-section h3 {
-      color: var(--accent2);
-      margin-top: 0;
-    }
-
-    .file-input {
-      display: none;
-    }
-
-    .upload-btn {
-      display: inline-block;
-      padding: 12px 24px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border: none;
-      color: white;
+    .search-box, .filter-select {
+      padding: 11px 15px;
       border-radius: 12px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      margin: 10px 5px;
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
     }
 
-    .upload-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(255, 20, 147, 0.4);
+    .search-box { flex: 1; min-width: 220px; border: 2px solid var(--accent); }
+    .search-box:focus { box-shadow: 0 0 20px rgba(255, 20, 147, 0.5); border-color: var(--accent2); }
+    .filter-select { border: 2px solid var(--accent2); cursor: pointer; max-width: 240px; }
+    .filter-select:hover { box-shadow: 0 0 15px rgba(0, 217, 255, 0.4); }
+    .filter-select option { background: var(--bg1); color: var(--text); }
+
+    .result-count { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 16px; }
+
+    /* ---------- grid ---------- */
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .video-grid.list { grid-template-columns: 1fr; gap: 12px; }
+
+    .video-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 20, 147, 0.2);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 12px var(--shadow);
+      position: relative;
+      display: flex;
+      flex-direction: column;
     }
+
+    .video-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 12px 32px rgba(255, 20, 147, 0.3); }
+    .video-card.active { border-color: var(--accent2); box-shadow: 0 0 0 2px var(--accent2), 0 12px 32px rgba(0, 217, 255, 0.25); }
+    .video-card.missing { opacity: 0.72; }
+
+    .video-grid.list .video-card { flex-direction: row; align-items: stretch; }
+    .video-grid.list .video-thumbnail { width: 200px; height: auto; aspect-ratio: 16 / 9; flex: 0 0 200px; }
+    .video-grid.list .video-info { flex: 1; }
+
+    .video-thumbnail {
+      width: 100%;
+      height: 158px;
+      background: linear-gradient(135deg, #333, #555);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .video-thumbnail img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .video-thumbnail .thumb-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: rgba(255, 255, 255, 0.75);
+      text-shadow: 0 3px 12px rgba(0, 0, 0, 0.7);
+      letter-spacing: 0.08em;
+      font-weight: bold;
+      pointer-events: none;
+    }
+
+    .badge {
+      position: absolute;
+      top: 8px;
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      backdrop-filter: blur(6px);
+      z-index: 2;
+    }
+
+    .badge.left { left: 8px; background: rgba(0, 0, 0, 0.72); color: var(--accent2); }
+    .badge.right { right: 8px; }
+    .badge.ok { background: rgba(16, 185, 129, 0.9); color: #04231a; }
+    .badge.none { background: rgba(239, 68, 68, 0.88); color: #fff; }
+    .badge.demo { background: rgba(251, 191, 36, 0.92); color: #2b1c00; }
+
+    .card-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(0, 0, 0, 0.6); z-index: 2; }
+    .card-progress > span { display: block; height: 100%; background: var(--accent); }
+
+    .video-info { padding: 15px; }
+    .video-title { font-weight: bold; font-size: 0.95rem; margin: 0 0 8px; color: var(--accent2); line-height: 1.4; }
+    .video-meta { font-size: 0.83rem; color: var(--text-muted); margin: 0; line-height: 1.55; }
+
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+
+    .season-tag {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: bold;
+    }
+
+    .fav-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 3px 9px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .fav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .fav-btn.on { background: rgba(255, 20, 147, 0.22); border-color: var(--accent); color: #fff; }
+
+    .load-more-wrap { text-align: center; margin-top: 24px; }
+
+    .no-results { text-align: center; padding: 56px 20px; color: var(--text-muted); font-size: 1.05rem; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ---------- toasts ---------- */
+    .toasts { position: fixed; right: 18px; bottom: 18px; z-index: 400; display: flex; flex-direction: column; gap: 10px; max-width: min(360px, calc(100vw - 36px)); }
+
+    .toast {
+      background: rgba(10, 14, 39, 0.96);
+      border: 1px solid var(--accent2);
+      border-left: 5px solid var(--accent2);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      box-shadow: 0 10px 30px var(--shadow);
+      animation: toast-in 0.25s ease;
+      line-height: 1.45;
+    }
+
+    .toast.ok { border-color: var(--ok); border-left-color: var(--ok); }
+    .toast.warn { border-color: var(--warn); border-left-color: var(--warn); }
+    .toast.bad { border-color: var(--bad); border-left-color: var(--bad); }
+    .toast.leaving { opacity: 0; transform: translateX(20px); transition: all 0.3s ease; }
+
+    @keyframes toast-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
     footer {
       text-align: center;
-      padding: 32px 20px;
+      padding: 28px 20px;
       border-top: 1px solid rgba(255, 20, 147, 0.2);
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       background: var(--panel);
+      line-height: 1.7;
     }
 
     @media (max-width: 768px) {
-      .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      }
+      .video-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+      .player-section { padding: 18px; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .search-box, .filter-select { width: 100%; max-width: none; }
+      .video-grid.list .video-thumbnail { width: 120px; flex-basis: 120px; }
+      .queue-row { grid-template-columns: 1fr; }
+      .detail-label { min-width: 96px; }
+    }
 
-      .player-section {
-        padding: 20px;
-      }
-
-      .controls {
-        flex-direction: column;
-      }
-
-      .search-box,
-      .filter-select {
-        width: 100%;
-      }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      html { scroll-behavior: auto; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>🎬 Basketball Wives LA</h1>
-    <p>MP4 Video Player | 100 Episode Library</p>
+    <p>MP4 Video Player · 100 Episode Library · Everything stored locally on this device</p>
   </header>
 
   <div class="container">
-    <div class="upload-section">
-      <h3>📤 Upload Your MP4 Videos</h3>
-      <p style="color: var(--text-muted); margin-bottom: 20px;">
-        Add your own MP4 video files to create custom episodes
+    <!-- ============ LIBRARY SUMMARY ============ -->
+    <section class="summary" aria-label="Library summary">
+      <div class="stat-box">
+        <div class="stat-number" id="sumEpisodes">0</div>
+        <div class="stat-label">Episodes</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="sumLoaded">0</div>
+        <div class="stat-label">Videos Loaded</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="sumRuntime">0m</div>
+        <div class="stat-label">Local Runtime</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="sumSize">0 MB</div>
+        <div class="stat-label">Storage Used</div>
+      </div>
+      <div class="persist-note">
+        <span id="persistState">Checking browser storage…</span>
+        <button class="btn small ghost" id="persistBtn" type="button" hidden>Make storage persistent</button>
+        <button class="btn small ghost" id="demoBtn" type="button">🎞 Generate a demo clip</button>
+      </div>
+    </section>
+
+    <!-- ============ UPLOAD ============ -->
+    <section class="upload-section" id="dropzone" aria-label="Upload videos">
+      <h3>📤 Load Your MP4 Videos</h3>
+      <p class="hint">
+        Drag &amp; drop video files anywhere in this box, or browse for them. Files never leave this device —
+        they are saved in your browser's local database.
       </p>
-      <input type="file" id="fileInput" class="file-input" accept=".mp4" multiple />
-      <button class="upload-btn" onclick="document.getElementById('fileInput').click();">
-        ➕ Choose MP4 Files
-      </button>
-      <button class="upload-btn" onclick="clearAllVideos();">
-        🗑️ Clear All
-      </button>
-      <p id="uploadStatus" style="color: var(--accent2); margin-top: 10px; font-size: 0.9rem;"></p>
-    </div>
+      <input type="file" id="fileInput" class="file-input" accept="video/*,.mp4,.webm,.mov,.m4v" multiple />
+      <button class="btn" id="browseBtn" type="button">➕ Choose Video Files</button>
+      <button class="btn ghost" id="targetBtn" type="button">🎯 Assign to current episode</button>
+      <button class="btn danger" id="clearBtn" type="button">🗑️ Clear All Loaded Videos</button>
+      <div class="status-line" id="uploadStatus" role="status" aria-live="polite"></div>
+      <div class="queue" id="queue" aria-live="polite"></div>
+    </section>
 
-    <div class="player-section">
-      <h2 class="player-title" id="playerTitle">Select an episode to play</h2>
+    <!-- ============ CONTINUE WATCHING ============ -->
+    <section id="continueSection" hidden>
+      <h2 class="section-title">▶ Continue Watching</h2>
+      <div class="rail" id="continueRail"></div>
+    </section>
 
-      <div class="video-player-container">
-        <video id="mainVideo" controls>
-          <source src="" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+    <!-- ============ PLAYER ============ -->
+    <section class="player-section" id="playerSection" aria-label="Video player">
+      <div class="player-head">
+        <div>
+          <h2 class="player-title" id="playerTitle">Select an episode</h2>
+          <p class="player-sub" id="playerSub">Pick any card from the library below to load it into the player.</p>
+        </div>
+        <div class="player-actions">
+          <button class="btn ghost small" id="prevBtn" type="button" disabled>⏮ Prev</button>
+          <button class="btn ghost small" id="nextBtn" type="button" disabled>Next ⏭</button>
+          <button class="btn ghost small" id="favBtn" type="button" disabled>☆ Favorite</button>
+        </div>
       </div>
 
-      <div class="video-info-panel" id="infoPanel" style="display: none;">
+      <div class="video-player-container">
+        <video id="mainVideo" controls playsinline preload="metadata" aria-label="Episode video player"></video>
+        <div class="empty-stage" id="emptyStage">
+          <strong>No video loaded</strong>
+          <span>Load an MP4 for this episode, or generate a demo clip to test the player.</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:18px;">
+        <label class="toggle">
+          <input type="checkbox" id="autoplayNext" />
+          Autoplay next episode
+        </label>
+        <p class="kbd-hints" style="margin:0;">
+          <kbd>Space</kbd>/<kbd>K</kbd> play · <kbd>←</kbd><kbd>→</kbd> 5s · <kbd>J</kbd><kbd>L</kbd> 10s ·
+          <kbd>↑</kbd><kbd>↓</kbd> volume · <kbd>N</kbd>/<kbd>P</kbd> episode · <kbd>F</kbd> fullscreen · <kbd>M</kbd> mute
+        </p>
+      </div>
+
+      <div class="video-info-panel" id="infoPanel" hidden>
         <div class="detail-row">
           <span class="detail-label">Title:</span>
           <span class="detail-value" id="infoTitle">—</span>
@@ -402,253 +594,1692 @@
           <span class="detail-label">Cast:</span>
           <span class="detail-value" id="infoCast">—</span>
         </div>
+        <div class="detail-row">
+          <span class="detail-label">Local File:</span>
+          <span class="detail-value" id="infoFile">—</span>
+        </div>
       </div>
 
-      <div class="stats" id="statsContainer" style="display: none;"></div>
+      <div class="stats" id="statsContainer" hidden></div>
 
-      <div class="description-box" id="descriptionBox" style="display: none;">
+      <div class="description-box" id="descriptionBox" hidden>
         <strong>Episode Description:</strong><br /><span id="descriptionText"></span>
       </div>
-    </div>
+    </section>
 
-    <h2 style="color: var(--accent2); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 40px;">
-      📺 Episode Library
-    </h2>
+    <!-- ============ LIBRARY ============ -->
+    <section aria-label="Episode library">
+      <h2 class="section-title">📺 Episode Library</h2>
 
-    <div class="controls">
-      <input
-        type="text"
-        class="search-box"
-        id="searchBox"
-        placeholder="Search episodes, cast, or keywords..."
-      />
-      <select class="filter-select" id="seasonFilter">
-        <option value="">All Seasons</option>
-        <option value="1">Season 1</option>
-        <option value="2">Season 2</option>
-        <option value="3">Season 3</option>
-        <option value="4">Season 4</option>
-        <option value="5">Season 5</option>
-        <option value="6">Season 6</option>
-      </select>
-    </div>
+      <div class="controls">
+        <input type="search" class="search-box" id="searchBox" placeholder="Search titles, descriptions, cast, keywords…" aria-label="Search episodes" />
+        <select class="filter-select" id="seasonFilter" aria-label="Filter by season">
+          <option value="">All Seasons</option>
+        </select>
+        <select class="filter-select" id="castFilter" aria-label="Filter by cast">
+          <option value="">All Cast</option>
+        </select>
+        <select class="filter-select" id="videoFilter" aria-label="Filter by loaded videos">
+          <option value="">All Episodes</option>
+          <option value="loaded">Loaded videos only</option>
+          <option value="missing">Missing videos only</option>
+          <option value="fav">Favorites only</option>
+        </select>
+        <select class="filter-select" id="sortSelect" aria-label="Sort episodes">
+          <option value="library">Sort: Library order</option>
+          <option value="views">Sort: Most viewed</option>
+          <option value="date">Sort: Air date</option>
+          <option value="title">Sort: Title A–Z</option>
+          <option value="added">Sort: Recently loaded</option>
+          <option value="remaining">Sort: Least remaining</option>
+        </select>
+        <button class="btn ghost small" id="viewBtn" type="button" aria-pressed="false">☰ List view</button>
+      </div>
 
-    <div class="video-grid" id="videoGrid"></div>
-    <div class="no-results" id="noResults" style="display: none;">
-      No episodes found. Upload MP4 files or try a different search.
-    </div>
+      <p class="result-count" id="resultCount" role="status" aria-live="polite"></p>
+
+      <div class="video-grid" id="videoGrid"></div>
+
+      <div class="no-results" id="noResults" hidden>
+        No episodes match those filters. Try a different search, or load a video file.
+      </div>
+
+      <div class="load-more-wrap" id="loadMoreWrap" hidden>
+        <button class="btn ghost" id="loadMoreBtn" type="button">Load more episodes</button>
+      </div>
+    </section>
   </div>
+
+  <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 
   <footer>
     <p>
-      Basketball Wives LA © VH1 | MP4 Video Player | Local File Storage
+      Basketball Wives LA · 100 episode metadata library · MP4 / WebM local playback<br />
+      No accounts, no network calls, no external media — your files stay in this browser's local storage.
     </p>
   </footer>
 
   <script>
-    // Generate default 100 videos (metadata only)
-    const generateVideoMetadata = () => {
+    "use strict";
+
+    /* =====================================================================
+       0. Small utilities
+       ===================================================================== */
+    const $ = (id) => document.getElementById(id);
+
+    /* #region pure-data -- no DOM or browser APIs in here; tests/data.test.js lifts this block out and runs it under Node. Keep it that way. */
+
+    const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+
+    const fmtBytes = (bytes) => {
+      if (!bytes || bytes < 0) return "0 MB";
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      const i = clamp(Math.floor(Math.log(bytes) / Math.log(1024)), 0, units.length - 1);
+      const val = bytes / Math.pow(1024, i);
+      return `${val >= 100 || i === 0 ? Math.round(val) : val.toFixed(1)} ${units[i]}`;
+    };
+
+    const fmtTime = (secs) => {
+      if (!isFinite(secs) || secs < 0) return "0:00";
+      const s = Math.floor(secs % 60);
+      const m = Math.floor((secs / 60) % 60);
+      const h = Math.floor(secs / 3600);
+      return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
+    };
+
+    const fmtRuntime = (secs) => {
+      if (!secs) return "0m";
+      const h = Math.floor(secs / 3600);
+      const m = Math.round((secs % 3600) / 60);
+      return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    };
+
+    /** Deterministic PRNG (mulberry32) — same library on every reload. */
+    const mulberry32 = (seed) => () => {
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+
+    const hashString = (str) => {
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    };
+
+    const toDateKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+    const fmtDate = (d) => d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+
+    /* =====================================================================
+       1. IndexedDB wrapper (local persistence for videos + thumbnails)
+       ===================================================================== */
+    const DB_NAME = "bwl-library";
+    const DB_VERSION = 1;
+    let dbPromise = null;
+
+    const openDb = () => {
+      if (dbPromise) return dbPromise;
+      dbPromise = new Promise((resolve, reject) => {
+        if (!("indexedDB" in window)) return reject(new Error("IndexedDB unavailable"));
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains("media")) db.createObjectStore("media", { keyPath: "id" });
+          if (!db.objectStoreNames.contains("thumbs")) db.createObjectStore("thumbs", { keyPath: "id" });
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error || new Error("Could not open local database"));
+      });
+      return dbPromise;
+    };
+
+    const idb = (store, mode, fn) =>
+      openDb().then(
+        (db) =>
+          new Promise((resolve, reject) => {
+            const tx = db.transaction(store, mode);
+            const req = fn(tx.objectStore(store));
+            tx.oncomplete = () => resolve(req && "result" in req ? req.result : undefined);
+            tx.onerror = () => reject(tx.error);
+            tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+          })
+      );
+
+    const storage = {
+      getAllMedia: () => idb("media", "readonly", (s) => s.getAll()).catch(() => []),
+      putMedia: (rec) => idb("media", "readwrite", (s) => s.put(rec)),
+      deleteMedia: (id) => idb("media", "readwrite", (s) => s.delete(id)),
+      clearMedia: () => idb("media", "readwrite", (s) => s.clear()),
+      getThumb: (id) => idb("thumbs", "readonly", (s) => s.get(id)),
+      putThumb: (rec) => idb("thumbs", "readwrite", (s) => s.put(rec)),
+      deleteThumb: (id) => idb("thumbs", "readwrite", (s) => s.delete(id)),
+      clearThumbs: () => idb("thumbs", "readwrite", (s) => s.clear()),
+    };
+
+    /* =====================================================================
+       2. Preferences + progress (lightweight, localStorage)
+       ===================================================================== */
+    const lsGet = (key, fallback) => {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw === null ? fallback : JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    };
+
+    const lsSet = (key, value) => {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {
+        /* private mode / quota — preferences just won't persist */
+      }
+    };
+
+    const prefs = Object.assign(
+      { autoplayNext: false, sort: "library", view: "grid", season: "", cast: "", videoFilter: "", search: "" },
+      lsGet("bwl.prefs", {})
+    );
+    const savePrefs = () => lsSet("bwl.prefs", prefs);
+
+    let progress = lsGet("bwl.progress", {}); // id -> {t, d, done, updatedAt}
+    const saveProgress = () => lsSet("bwl.progress", progress);
+    let favorites = new Set(lsGet("bwl.favorites", []));
+    const saveFavorites = () => lsSet("bwl.favorites", [...favorites]);
+
+    /* =====================================================================
+       3. The 100-episode library (deterministic metadata)
+       ===================================================================== */
+    const SEASONS = [
+      { season: 1, episodes: 14, year: 2011, startMonth: 3 },
+      { season: 2, episodes: 16, year: 2012, startMonth: 4 },
+      { season: 3, episodes: 17, year: 2013, startMonth: 2 },
+      { season: 4, episodes: 18, year: 2014, startMonth: 3 },
+      { season: 5, episodes: 20, year: 2015, startMonth: 2 },
+      { season: 6, episodes: 15, year: 2016, startMonth: 3 },
+    ]; // 14+16+17+18+20+15 === 100
+
+    const CAST_POOL = [
+      "Gloria Govan", "Draya Michele", "Brooke Bailey", "Malaysia Pacho",
+      "LeeLee Castillo", "Jackie Christie", "Brandi Maxiell", "Tami Roman",
+      "Shaunie O'Neal", "Evelyn Lozada", "Jennifer Williams", "Kehlanie P",
+    ];
+
+    const TITLE_TEMPLATES = [
+      (c) => `Truth or ${c.first} Consequences`,
+      (c) => `${c.first} Throws Shade, Everyone Gets Hit`,
+      (c) => `A ${c.place} Reckoning`,
+      (c) => `Loyalty Costs Extra in ${c.place}`,
+      (c) => `${c.first}'s Party, ${c.rival}'s Problem`,
+      (c) => `Receipts in ${c.place}`,
+      (c) => `The Group Chat Blows Up`,
+      (c) => `${c.first} vs. ${c.rival}: Round ${c.round}`,
+      (c) => `Diamonds, Denial and ${c.first}`,
+      (c) => `Sisterhood on Life Support`,
+      (c) => `${c.event} Goes Off the Rails`,
+      (c) => `What Happens in ${c.place} Doesn't Stay`,
+      (c) => `${c.first} Draws the Line`,
+      (c) => `Apologies Accepted, Barely`,
+      (c) => `${c.brand} Launch, Meltdown Included`,
+      (c) => `The Reunion: Part ${c.round}`,
+    ];
+
+    const PLACES = ["Miami", "Vegas", "Cabo", "Atlanta", "Malibu", "New Orleans", "Palm Springs", "Hawaii", "Dallas", "NYC"];
+    const EVENTS = ["Charity Gala", "Baby Shower", "Birthday Bash", "Fashion Launch", "Pool Party", "Wine Tasting", "Bridal Brunch", "Awards Afterparty"];
+    const BRANDS = ["Lip Gloss", "Athleisure", "Tequila", "Skincare", "Boutique", "Wig Line", "Sunglasses", "Candle"];
+    const HOOKS = [
+      "An old rumor resurfaces at exactly the wrong moment.",
+      "A surprise guest turns a celebration into an intervention.",
+      "Someone reads the receipts out loud, and the room goes silent.",
+      "A business deal forces two rivals to share a table.",
+      "A leaked text thread changes who trusts whom.",
+      "One honest question unravels three friendships.",
+      "A makeup session ends with a walkout.",
+      "Family loyalty collides with sisterhood.",
+      "A gift with strings attached starts a feud.",
+      "Nobody agrees on what was actually said.",
+    ];
+    const CLOSES = [
+      "By the end of the night, alliances are redrawn.",
+      "Nothing gets resolved, but everything gets recorded.",
+      "The group splits into camps before dessert is served.",
+      "One apology lands, another one absolutely does not.",
+      "The fallout carries straight into the next episode.",
+      "Somebody storms off, and the cameras follow.",
+    ];
+
+    const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
+
+    const buildLibrary = () => {
+      const rng = mulberry32(20110404);
       const videos = [];
-      const seasons = [
-        { season: 1, episodes: 12 },
-        { season: 2, episodes: 15 },
-        { season: 3, episodes: 14 },
-        { season: 4, episodes: 16 },
-        { season: 5, episodes: 17 },
-        { season: 6, episodes: 11 },
-      ];
+      let id = 1;
 
-      const descriptions = [
-        "Drama unfolds as cast members confront each other about recent betrayals.",
-        "A surprise party goes wrong when tensions boil over between longtime friends.",
-        "Fashion meets function as the ladies prepare for a glamorous charity event.",
-        "New alliances form while old friendships are tested to their limits.",
-        "Behind-the-scenes drama escalates as secrets come to light.",
-        "The cast celebrates a milestone while navigating personal challenges.",
-        "Love and loyalty are questioned in this explosive episode.",
-        "A heated confrontation leads to unexpected revelations.",
-        "The ladies plan their ultimate vacation destination.",
-        "Family drama intersects with cast dynamics in surprising ways.",
-      ];
+      SEASONS.forEach(({ season, episodes, year, startMonth }) => {
+        let airCursor = new Date(year, startMonth, 4 + Math.floor(rng() * 10));
 
-      let videoId = 1;
+        for (let episode = 1; episode <= episodes; episode++, id++) {
+          const lead = pick(rng, CAST_POOL);
+          const first = lead.split(" ")[0];
+          let rival = pick(rng, CAST_POOL);
+          if (rival === lead) rival = CAST_POOL[(CAST_POOL.indexOf(lead) + 3) % CAST_POOL.length];
 
-      seasons.forEach(({ season, episodes }) => {
-        for (let ep = 1; ep <= episodes && videoId <= 100; ep++) {
+          const ctx = {
+            first,
+            rival,
+            place: pick(rng, PLACES),
+            event: pick(rng, EVENTS),
+            brand: pick(rng, BRANDS),
+            round: 1 + Math.floor(rng() * 3),
+          };
+
+          const template = TITLE_TEMPLATES[(id - 1) % TITLE_TEMPLATES.length];
+          const title = template(ctx);
+
+          // Weekly-ish air cadence with the occasional skip week.
+          airCursor = new Date(airCursor.getTime() + (7 * (1 + (rng() < 0.18 ? 1 : 0))) * 86400000);
+
+          const guestCount = 2 + Math.floor(rng() * 3);
+          const guests = [];
+          while (guests.length < guestCount) {
+            const g = pick(rng, CAST_POOL);
+            if (g !== lead && !guests.includes(g)) guests.push(g);
+          }
+          const cast = [lead, ...guests.sort()];
+
           videos.push({
-            id: videoId,
+            id,
             season,
-            episode: ep,
-            title: `Season ${season}, Episode ${ep}`,
-            description: descriptions[(videoId - 1) % descriptions.length],
-            airDate: new Date(2011 + season, Math.random() * 12, Math.random() * 28 + 1)
-              .toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              }),
-            cast: ["Shaunie O'Neal", "Gloria Govan", "Draya Michele", "Tami Roman"][
-              Math.floor(Math.random() * 4)
-            ],
-            views: Math.floor(Math.random() * 500000 + 50000),
-            mp4Url: null,
+            episode,
+            code: `S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`,
+            title,
+            description: `${pick(rng, HOOKS)} ${lead} holds court in ${ctx.place} while ${pick(rng, HOOKS).toLowerCase()} ${pick(rng, CLOSES)}`,
+            airDate: fmtDate(airCursor),
+            airKey: toDateKey(airCursor),
+            runtime: 41 + Math.floor(rng() * 4), // minutes, broadcast slot
+            cast,
+            keywords: [ctx.place, ctx.event, ctx.brand, "LA", "reunion", "drama"].filter(Boolean),
+            views: Math.floor(rng() * 900000) + 45000,
           });
-          videoId++;
         }
       });
 
       return videos;
     };
 
-    let allVideos = generateVideoMetadata();
-    let filteredVideos = [...allVideos];
+    const allVideos = buildLibrary(); // library order is the canonical playlist order
+    const byId = new Map(allVideos.map((v) => [v.id, v]));
+
+    const escapeHtml = (str) =>
+      String(str).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+
+    /**
+     * Read an episode code out of a filename. Patterns are tried most-specific
+     * first: S02E05 / s2e5 / S02-E05 / S02_E05 / s2 e5, then 2x05, then the
+     * spelled-out "Season 2 Episode 5", then the bare S02.05 form.
+     */
+    const EPISODE_NAME_PATTERNS = [
+      /s(\d{1,2})[\s._-]*e[\s._-]*(\d{1,3})/,
+      /(\d{1,2})\s*x\s*(\d{1,3})/,
+      /(?:season|ep(?:isode)?)\D*(\d{1,2})\D*(?:episode|ep)\D*(\d{1,3})/,
+      /s(\d{1,2})[\s._-]+(\d{1,3})/,
+    ];
+
+    const guessEpisodeFromName = (name) => {
+      if (!name) return null;
+      const lower = String(name).toLowerCase();
+      for (const pattern of EPISODE_NAME_PATTERNS) {
+        const m = lower.match(pattern);
+        if (!m) continue;
+        const season = parseInt(m[1], 10);
+        const episode = parseInt(m[2], 10);
+        const hit = allVideos.find((v) => v.season === season && v.episode === episode);
+        if (hit) return hit.id;
+      }
+      return null;
+    };
+
+    /* #endregion pure-data */
+
+    /** id -> { blob, fileName, size, format, duration, thumbBlob?, addedAt, demo? } */
+    const media = new Map();
+    /** id -> object URL for the media blob (revoked on replace/clear) */
+    const objectUrls = new Map();
+    /** id -> object URL for the thumbnail blob (LRU-managed) */
+    const thumbUrls = new Map();
+    const THUMB_URL_LIMIT = 140;
+
     let currentVideo = null;
-    let uploadedFiles = {};
+    let visibleCount = 24;
+    const PAGE_SIZE = 24;
+    let renderedIds = [];
 
-    const videoGrid = document.getElementById("videoGrid");
-    const searchBox = document.getElementById("searchBox");
-    const seasonFilter = document.getElementById("seasonFilter");
-    const mainVideo = document.getElementById("mainVideo");
-    const playerTitle = document.getElementById("playerTitle");
-    const infoPanel = document.getElementById("infoPanel");
-    const fileInput = document.getElementById("fileInput");
-    const uploadStatus = document.getElementById("uploadStatus");
-    const noResults = document.getElementById("noResults");
+    /* =====================================================================
+       4. DOM references
+       ===================================================================== */
+    const videoGrid = $("videoGrid");
+    const searchBox = $("searchBox");
+    const seasonFilter = $("seasonFilter");
+    const castFilter = $("castFilter");
+    const videoFilter = $("videoFilter");
+    const sortSelect = $("sortSelect");
+    const viewBtn = $("viewBtn");
+    const resultCount = $("resultCount");
+    const noResults = $("noResults");
+    const loadMoreWrap = $("loadMoreWrap");
+    const loadMoreBtn = $("loadMoreBtn");
+    const mainVideo = $("mainVideo");
+    const emptyStage = $("emptyStage");
+    const playerTitle = $("playerTitle");
+    const playerSub = $("playerSub");
+    const infoPanel = $("infoPanel");
+    const statsContainer = $("statsContainer");
+    const descriptionBox = $("descriptionBox");
+    const fileInput = $("fileInput");
+    const uploadStatus = $("uploadStatus");
+    const dropzone = $("dropzone");
+    const queueEl = $("queue");
+    const continueSection = $("continueSection");
+    const continueRail = $("continueRail");
+    const toasts = $("toasts");
+    const prevBtn = $("prevBtn");
+    const nextBtn = $("nextBtn");
+    const favBtn = $("favBtn");
+    const autoplayNext = $("autoplayNext");
 
-    const renderVideos = (videos) => {
-      videoGrid.innerHTML = "";
-      noResults.style.display = videos.length === 0 ? "block" : "none";
-
-      videos.forEach((video) => {
-        const card = document.createElement("div");
-        card.className = "video-card";
-        card.innerHTML = `
-          <div class="video-thumbnail"></div>
-          <div class="video-info">
-            <h3 class="video-title">${video.title}</h3>
-            <p class="video-meta">
-              Cast: ${video.cast}<br/>
-              Air Date: ${video.airDate}<br/>
-              Views: ${video.views.toLocaleString()}
-            </p>
-            <span class="season-tag">S${video.season}E${video.episode}</span>
-          </div>
-        `;
-        card.addEventListener("click", () => playVideo(video));
-        videoGrid.appendChild(card);
-      });
-    };
-
-    const playVideo = (video) => {
-      currentVideo = video;
-      playerTitle.textContent = video.title;
-
-      if (video.mp4Url) {
-        mainVideo.src = video.mp4Url;
-        mainVideo.play().catch(() => {
-          console.log("Autoplay blocked");
-        });
-      } else {
-        mainVideo.src = "";
-        uploadStatus.textContent = "⚠️ No MP4 file uploaded for this episode. Upload a file to play.";
-        uploadStatus.style.color = "#fbbf24";
-      }
-
-      document.getElementById("infoTitle").textContent = video.title;
-      document.getElementById("infoSeason").textContent = `Season ${video.season}`;
-      document.getElementById("infoEpisode").textContent = `Episode ${video.episode}`;
-      document.getElementById("infoAirDate").textContent = video.airDate;
-      document.getElementById("infoCast").textContent = video.cast;
-      document.getElementById("descriptionText").textContent = video.description;
-
-      document.getElementById("statsContainer").innerHTML = `
-        <div class="stat-box">
-          <div class="stat-number">${video.views.toLocaleString()}</div>
-          <div class="stat-label">Views</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number">${video.season}</div>
-          <div class="stat-label">Season</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number">${video.episode}</div>
-          <div class="stat-label">Episode</div>
-        </div>
-      `;
-
-      infoPanel.style.display = "block";
-      document.getElementById("statsContainer").style.display = "grid";
-      document.getElementById("descriptionBox").style.display = "block";
-    };
-
-    const filterVideos = () => {
-      const searchTerm = searchBox.value.toLowerCase();
-      const seasonTerm = seasonFilter.value;
-
-      filteredVideos = allVideos.filter((video) => {
-        const matchesSearch =
-          video.title.toLowerCase().includes(searchTerm) ||
-          video.description.toLowerCase().includes(searchTerm) ||
-          video.cast.toLowerCase().includes(searchTerm);
-
-        const matchesSeason = seasonTerm === "" || video.season == seasonTerm;
-
-        return matchesSearch && matchesSeason;
-      });
-
-      renderVideos(filteredVideos);
-    };
-
-    // File upload handling
-    fileInput.addEventListener("change", (e) => {
-      const files = e.target.files;
-      let uploadedCount = 0;
-
-      for (let file of files) {
-        if (file.type === "video/mp4") {
-          const fileReader = new FileReader();
-          fileReader.onload = (event) => {
-            const videoBlob = new Blob([event.target.result], { type: "video/mp4" });
-            const videoUrl = URL.createObjectURL(videoBlob);
-
-            // Assign to next available video
-            let assignedVideo = allVideos.find((v) => !v.mp4Url);
-            if (assignedVideo) {
-              assignedVideo.mp4Url = videoUrl;
-              uploadedCount++;
-            }
-          };
-          fileReader.readAsArrayBuffer(file);
-        }
-      }
-
+    /* =====================================================================
+       5. Toasts + status line
+       ===================================================================== */
+    const toast = (message, kind = "info", ms = 3600) => {
+      const el = document.createElement("div");
+      el.className = `toast ${kind}`;
+      el.textContent = message;
+      toasts.appendChild(el);
       setTimeout(() => {
-        uploadStatus.textContent = `✅ ${uploadedCount} MP4 file(s) uploaded successfully!`;
-        uploadStatus.style.color = "#10b981";
-        renderVideos(filteredVideos);
-      }, 1000);
+        el.classList.add("leaving");
+        setTimeout(() => el.remove(), 320);
+      }, ms);
+    };
 
+    const setStatus = (message, color = "var(--accent2)") => {
+      uploadStatus.textContent = message;
+      uploadStatus.style.color = color;
+    };
+
+    /* =====================================================================
+       6. Object URL helpers (keep memory tidy)
+       ===================================================================== */
+    const mediaUrl = (id) => {
+      const rec = media.get(id);
+      if (!rec || !rec.blob) return "";
+      if (objectUrls.has(id)) return objectUrls.get(id);
+      const url = URL.createObjectURL(rec.blob);
+      objectUrls.set(id, url);
+      return url;
+    };
+
+    const releaseMediaUrl = (id) => {
+      const url = objectUrls.get(id);
+      if (url) {
+        URL.revokeObjectURL(url);
+        objectUrls.delete(id);
+      }
+    };
+
+    const thumbUrl = (id) => {
+      const rec = media.get(id);
+      if (!rec || !rec.thumbBlob) return "";
+      if (thumbUrls.has(id)) {
+        // refresh LRU position
+        const url = thumbUrls.get(id);
+        thumbUrls.delete(id);
+        thumbUrls.set(id, url);
+        return url;
+      }
+      const url = URL.createObjectURL(rec.thumbBlob);
+      thumbUrls.set(id, url);
+      while (thumbUrls.size > THUMB_URL_LIMIT) {
+        const oldest = thumbUrls.keys().next().value;
+        const old = thumbUrls.get(oldest);
+        if (old && mainVideo.src !== old) URL.revokeObjectURL(old);
+        thumbUrls.delete(oldest);
+      }
+      return url;
+    };
+
+    /* =====================================================================
+       7. Metadata extraction + thumbnail capture
+       ===================================================================== */
+    const probeVideo = (blob, fileName) =>
+      new Promise((resolve) => {
+        const url = URL.createObjectURL(blob);
+        const probe = document.createElement("video");
+        probe.preload = "metadata";
+        probe.muted = true;
+        const done = (result) => {
+          probe.removeAttribute("src");
+          probe.load();
+          URL.revokeObjectURL(url);
+          resolve(result);
+        };
+        const timer = setTimeout(() => done({ duration: 0, width: 0, height: 0 }), 9000);
+        probe.onloadedmetadata = () => {
+          clearTimeout(timer);
+          done({
+            duration: isFinite(probe.duration) ? probe.duration : 0,
+            width: probe.videoWidth || 0,
+            height: probe.videoHeight || 0,
+          });
+        };
+        probe.onerror = () => {
+          clearTimeout(timer);
+          done({ duration: 0, width: 0, height: 0 });
+        };
+        probe.src = url;
+      });
+
+    const captureThumb = async (blob, duration) => {
+      if (!duration) return null;
+      const url = URL.createObjectURL(blob);
+      const vid = document.createElement("video");
+      vid.muted = true;
+      vid.playsInline = true;
+      vid.preload = "auto";
+      vid.src = url;
+
+      const seekTo = (time) =>
+        new Promise((resolve) => {
+          const finish = () => {
+            vid.removeEventListener("seeked", finish);
+            resolve();
+          };
+          vid.addEventListener("seeked", finish);
+          setTimeout(() => {
+            vid.removeEventListener("seeked", finish);
+            resolve();
+          }, 4000);
+          try {
+            vid.currentTime = clamp(time, 0.05, Math.max(0.05, duration - 0.2));
+          } catch {
+            resolve();
+          }
+        });
+
+      try {
+        await new Promise((resolve, reject) => {
+          vid.onloadeddata = resolve;
+          vid.onerror = () => reject(new Error("decode failed"));
+          setTimeout(reject, 6000, new Error("decode timeout"));
+        });
+        await seekTo(Math.min(duration * 0.12, 4) || 0.4);
+
+        const w = vid.videoWidth || 640;
+        const h = vid.videoHeight || 360;
+        const scale = Math.min(1, 400 / w);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(2, Math.round(w * scale));
+        canvas.height = Math.max(2, Math.round(h * scale));
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return null;
+        ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+
+        const blobThumb = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.72));
+        return blobThumb || null;
+      } catch {
+        return null;
+      } finally {
+        vid.removeAttribute("src");
+        vid.load();
+        URL.revokeObjectURL(url);
+      }
+    };
+
+    /* =====================================================================
+       8. Importing files -> episodes
+       ===================================================================== */
+    const episodeLabel = (id) => {
+      const v = byId.get(id);
+      return v ? `${v.code} · ${v.title}` : `Episode ${id}`;
+    };
+
+    const buildEpisodeOptions = (selectedId) =>
+      allVideos
+        .map((v) => `<option value="${v.id}"${v.id === selectedId ? " selected" : ""}>${v.code} — ${escapeHtml(v.title)}</option>`)
+        .join("");
+
+    let queueRows = [];
+
+    const renderQueue = () => {
+      queueEl.innerHTML = "";
+      queueEl.classList.toggle("active", queueRows.length > 0);
+      queueRows.forEach((row) => queueEl.appendChild(row.el));
+    };
+
+    const makeQueueRow = (file, targetId, guessed) => {
+      const el = document.createElement("div");
+      el.className = "queue-row";
+
+      const info = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "queue-name";
+      name.textContent = file.name;
+      const sub = document.createElement("div");
+      sub.className = "queue-sub";
+      sub.textContent = `${fmtBytes(file.size)} · ${file.type || "video"}${guessed ? " · episode detected from filename" : ""}`;
+      const bar = document.createElement("div");
+      bar.className = "queue-bar";
+      const fill = document.createElement("span");
+      bar.appendChild(fill);
+      info.append(name, sub, bar);
+
+      const select = document.createElement("select");
+      select.className = "filter-select";
+      select.setAttribute("aria-label", `Target episode for ${file.name}`);
+      select.style.maxWidth = "300px";
+      select.innerHTML = buildEpisodeOptions(targetId);
+
+      const importBtn = document.createElement("button");
+      importBtn.className = "btn small";
+      importBtn.type = "button";
+      importBtn.textContent = "Import";
+
+      const row = { el, file, select, fill, importBtn, sub, guessed };
+      importBtn.addEventListener("click", () => importRow(row));
+      el.append(info, select, importBtn);
+      return row;
+    };
+
+    const importRow = async (row) => {
+      const targetId = parseInt(row.select.value, 10);
+      row.importBtn.disabled = true;
+      row.fill.style.width = "25%";
+      row.sub.textContent = "Reading file…";
+
+      try {
+        await attachFileToEpisode(row.file, targetId, (pct, label) => {
+          row.fill.style.width = `${pct}%`;
+          if (label) row.sub.textContent = label;
+        });
+        row.fill.style.width = "100%";
+        row.sub.textContent = `Saved to ${episodeLabel(targetId)}`;
+        toast(`Loaded ${row.file.name} into ${episodeLabel(targetId)}`, "ok");
+        setTimeout(() => {
+          queueRows = queueRows.filter((r) => r !== row);
+          renderQueue();
+        }, 1400);
+      } catch (err) {
+        row.importBtn.disabled = false;
+        row.fill.style.width = "0%";
+        row.sub.textContent = `Failed: ${err && err.message ? err.message : "unknown error"}`;
+        toast(`Could not import ${row.file.name}`, "bad");
+      }
+    };
+
+    const attachFileToEpisode = async (file, episodeId, onProgress = () => {}) => {
+      const existing = media.get(episodeId);
+      if (existing) releaseMediaUrl(episodeId);
+
+      onProgress(15, "Reading file…");
+      const blob = new Blob([await file.arrayBuffer()], { type: file.type || "video/mp4" });
+
+      onProgress(45, "Inspecting video…");
+      const probe = await probeVideo(blob, file.name);
+
+      onProgress(70, "Capturing thumbnail…");
+      const thumbBlob = await captureThumb(blob, probe.duration);
+
+      const rec = {
+        id: episodeId,
+        blob,
+        thumbBlob,
+        fileName: file.name,
+        size: blob.size,
+        format: (file.type || "video/mp4").split("/").pop(),
+        duration: probe.duration,
+        width: probe.width,
+        height: probe.height,
+        addedAt: Date.now(),
+      };
+
+      onProgress(90, "Saving to local library…");
+      media.set(episodeId, rec);
+      try {
+        await storage.putMedia({
+          id: episodeId,
+          blob,
+          fileName: rec.fileName,
+          size: rec.size,
+          format: rec.format,
+          duration: rec.duration,
+          width: rec.width,
+          height: rec.height,
+          addedAt: rec.addedAt,
+        });
+        if (thumbBlob) await storage.putThumb({ id: episodeId, blob: thumbBlob });
+      } catch (err) {
+        toast("Saved for this session only — local database write failed.", "warn", 5200);
+      }
+
+      onProgress(100, "Done");
+      refreshAll();
+      return rec;
+    };
+
+    const handleFiles = async (fileList, { assignToCurrent = false } = {}) => {
+      const files = [...fileList].filter((f) => f.size > 0);
+      const videoFiles = files.filter((f) => f.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|mkv|ogv)$/i.test(f.name));
+      const rejected = files.length - videoFiles.length;
+
+      if (!videoFiles.length) {
+        setStatus("⚠️ No video files found in that selection.", "var(--warn)");
+        toast("No video files detected.", "warn");
+        return;
+      }
+
+      queueRows = [];
+      videoFiles.forEach((file, i) => {
+        let target = null;
+        let guessed = false;
+        if (assignToCurrent && currentVideo && i === 0) {
+          target = currentVideo.id;
+        } else {
+          target = guessEpisodeFromName(file.name);
+          guessed = target !== null;
+        }
+        if (target === null) {
+          // Fill the next empty slot, skipping anything already queued in this batch.
+          const taken = new Set(queueRows.map((r) => parseInt(r.select.value, 10)));
+          target = allVideos.find((v) => !media.has(v.id) && !taken.has(v.id))?.id || null;
+        }
+        if (target === null) {
+          toast(`Every episode already has a video — pick a target for ${file.name} manually.`, "warn", 5200);
+          return;
+        }
+        queueRows.push(makeQueueRow(file, target, guessed));
+      });
+      renderQueue();
+
+      if (rejected) setStatus(`⚠️ Skipped ${rejected} non-video file(s).`, "var(--warn)");
+      else setStatus(`✅ ${queueRows.length} file(s) queued — confirm the episode and press Import.`);
+
+      // Single file with a known target (explicit pick, or read from the
+      // filename): import immediately instead of making the user confirm.
+      if (queueRows.length === 1 && (assignToCurrent || queueRows[0].guessed)) {
+        await importRow(queueRows[0]);
+      }
+    };
+
+    /* =====================================================================
+       9. Local demo clip generator (canvas + MediaRecorder, no network)
+       ===================================================================== */
+    const pickRecorderType = () => {
+      if (typeof MediaRecorder === "undefined") return null;
+      const candidates = [
+        'video/mp4;codecs="avc1.42E01E"',
+        "video/mp4",
+        'video/webm;codecs="vp9"',
+        'video/webm;codecs="vp8"',
+        "video/webm",
+      ];
+      return candidates.find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || null;
+    };
+
+    const generateDemoClip = async () => {
+      if (!pickRecorderType()) {
+        toast("This browser can't record video locally. Load an MP4 file instead.", "warn", 5000);
+        return;
+      }
+      const probeCanvas = document.createElement("canvas");
+      if (typeof probeCanvas.captureStream !== "function") {
+        toast("This browser can't capture a canvas as video. Load an MP4 file instead.", "warn", 5000);
+        return;
+      }
+      const target = currentVideo || allVideos.find((v) => !media.has(v.id)) || allVideos[0];
+      const btn = $("demoBtn");
+      btn.disabled = true;
+      setStatus("🎞 Generating a local demo clip…");
+
+      try {
+        const seed = hashString(target.code + target.title);
+        const rng = mulberry32(seed);
+        const hueA = Math.floor(rng() * 360);
+        const hueB = (hueA + 60 + Math.floor(rng() * 180)) % 360;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 854;
+        canvas.height = 480;
+        const ctx = canvas.getContext("2d");
+        const stream = canvas.captureStream(30);
+        const mime = pickRecorderType();
+        const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 900000 });
+        const chunks = [];
+        recorder.ondataavailable = (e) => e.data && e.data.size && chunks.push(e.data);
+
+        const finished = new Promise((resolve) => (recorder.onstop = resolve));
+        recorder.start(250);
+
+        const DURATION = 9;
+        const started = performance.now();
+
+        const draw = (now) => {
+          const t = (now - started) / 1000;
+          const p = clamp(t / DURATION, 0, 1);
+
+          const g = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+          g.addColorStop(0, `hsl(${(hueA + t * 12) % 360}, 70%, 18%)`);
+          g.addColorStop(1, `hsl(${(hueB + t * 12) % 360}, 75%, 32%)`);
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Basketball arc lines
+          ctx.strokeStyle = "rgba(255,255,255,0.18)";
+          ctx.lineWidth = 3;
+          for (let i = 0; i < 4; i++) {
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height + 60, 150 + i * 70 + Math.sin(t + i) * 8, Math.PI, 0);
+            ctx.stroke();
+          }
+
+          ctx.textAlign = "center";
+          ctx.fillStyle = "rgba(255,255,255,0.95)";
+          ctx.font = "bold 34px Arial, sans-serif";
+          ctx.fillText("BASKETBALL WIVES LA", canvas.width / 2, 92);
+
+          ctx.font = "bold 28px Arial, sans-serif";
+          ctx.fillStyle = `hsl(${(hueB + 180) % 360}, 100%, 72%)`;
+          ctx.fillText(target.code, canvas.width / 2, 150);
+
+          ctx.font = "22px Arial, sans-serif";
+          ctx.fillStyle = "rgba(255,255,255,0.9)";
+          const words = target.title.split(" ");
+          let line = "";
+          let y = 205;
+          words.forEach((w) => {
+            const test = line ? `${line} ${w}` : w;
+            if (ctx.measureText(test).width > canvas.width - 120) {
+              ctx.fillText(line, canvas.width / 2, y);
+              line = w;
+              y += 30;
+            } else line = test;
+          });
+          if (line) ctx.fillText(line, canvas.width / 2, y);
+
+          ctx.font = "16px Arial, sans-serif";
+          ctx.fillStyle = "rgba(255,255,255,0.7)";
+          ctx.fillText("Locally generated demo clip · no network media", canvas.width / 2, canvas.height - 74);
+
+          // Progress bar
+          ctx.fillStyle = "rgba(0,0,0,0.45)";
+          ctx.fillRect(60, canvas.height - 52, canvas.width - 120, 12);
+          ctx.fillStyle = "#ff1493";
+          ctx.fillRect(60, canvas.height - 52, (canvas.width - 120) * p, 12);
+          ctx.fillStyle = "rgba(255,255,255,0.85)";
+          ctx.font = "14px Arial, sans-serif";
+          ctx.textAlign = "left";
+          ctx.fillText(fmtTime(t), 60, canvas.height - 24);
+          ctx.textAlign = "right";
+          ctx.fillText(fmtTime(DURATION), canvas.width - 60, canvas.height - 24);
+
+          if (t < DURATION) requestAnimationFrame(draw);
+          else if (recorder.state !== "inactive") recorder.stop();
+        };
+        requestAnimationFrame(draw);
+
+        await finished;
+        const blob = new Blob(chunks, { type: mime.split(";")[0] || "video/webm" });
+        const ext = (mime.startsWith("video/mp4") ? "mp4" : "webm");
+        const fakeFile = {
+          name: `${target.code}-demo-clip.${ext}`,
+          size: blob.size,
+          type: blob.type,
+          arrayBuffer: () => blob.arrayBuffer(),
+        };
+        await attachFileToEpisode(fakeFile, target.id);
+        setStatus(`✅ Demo clip created for ${episodeLabel(target.id)}.`);
+        toast(`Demo clip ready for ${target.code}`, "ok");
+        playVideo(target, { autoplay: true });
+      } catch (err) {
+        setStatus(`⚠️ Demo generation failed: ${err && err.message ? err.message : err}`, "var(--bad)");
+        toast("Demo clip generation failed in this browser.", "bad");
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    /* =====================================================================
+       10. Playback
+       ===================================================================== */
+    const updateEmptyStage = () => {
+      // Use the IDL property rather than the attribute: it stays correct even
+      // when a source is assigned programmatically without attribute reflection.
+      const hasSource = !!mainVideo.src;
+      emptyStage.style.display = hasSource ? "none" : "flex";
+      mainVideo.style.visibility = hasSource ? "visible" : "hidden";
+    };
+
+    const playVideo = async (video, { autoplay = false, resume = true } = {}) => {
+      if (!video) return;
+      currentVideo = video;
+
+      const rec = media.get(video.id);
+      playerTitle.textContent = `${video.code} — ${video.title}`;
+      playerSub.textContent = `Season ${video.season}, Episode ${video.episode} · Aired ${video.airDate} · ${video.runtime} min`;
+
+      if (rec) {
+        const url = mediaUrl(video.id);
+        if (mainVideo.src !== url) {
+          mainVideo.src = url;
+          mainVideo.load();
+        }
+        const saved = progress[video.id];
+        if (resume && saved && saved.t > 2 && saved.t < (rec.duration || saved.d || Infinity) - 4) {
+          const seekTarget = saved.t;
+          const onMeta = () => {
+            mainVideo.removeEventListener("loadedmetadata", onMeta);
+            try { mainVideo.currentTime = seekTarget; } catch { /* ignore */ }
+          };
+          if (mainVideo.readyState >= 1) {
+            try { mainVideo.currentTime = seekTarget; } catch { /* ignore */ }
+          } else mainVideo.addEventListener("loadedmetadata", onMeta);
+          toast(`Resuming ${video.code} at ${fmtTime(seekTarget)}`, "info", 2600);
+        }
+        if (autoplay) mainVideo.play().catch(() => {});
+      } else {
+        mainVideo.removeAttribute("src");
+        mainVideo.load();
+        setStatus(`⚠️ No video loaded for ${video.code}. Drop an MP4 on the upload box to assign it.`, "var(--warn)");
+      }
+
+      $("infoTitle").textContent = video.title;
+      $("infoSeason").textContent = `Season ${video.season}`;
+      $("infoEpisode").textContent = `Episode ${video.episode}`;
+      $("infoAirDate").textContent = video.airDate;
+      $("infoCast").textContent = video.cast.join(", ");
+      $("infoFile").textContent = rec
+        ? `${rec.fileName} · ${fmtBytes(rec.size)} · ${rec.format.toUpperCase()} · ${rec.duration ? fmtTime(rec.duration) : "unknown length"}`
+        : "None — metadata only";
+      $("descriptionText").textContent = video.description;
+
+      statsContainer.innerHTML = "";
+      [
+        [video.views.toLocaleString(), "Views"],
+        [video.runtime, "Runtime (min)"],
+        [`S${video.season}`, "Season"],
+        [`E${video.episode}`, "Episode"],
+        [rec ? fmtBytes(rec.size) : "—", "Local File"],
+      ].forEach(([num, label]) => {
+        const box = document.createElement("div");
+        box.className = "stat-box";
+        const n = document.createElement("div");
+        n.className = "stat-number";
+        n.style.fontSize = "1.25rem";
+        n.textContent = num;
+        const l = document.createElement("div");
+        l.className = "stat-label";
+        l.textContent = label;
+        box.append(n, l);
+        statsContainer.appendChild(box);
+      });
+
+      infoPanel.hidden = false;
+      statsContainer.hidden = false;
+      descriptionBox.hidden = false;
+      updateEmptyStage();
+      updateNavButtons();
+      markActiveCard();
+      renderContinueRail();
+    };
+
+    const neighbor = (delta) => {
+      if (!currentVideo) return delta > 0 ? allVideos[0] : allVideos[allVideos.length - 1];
+      const idx = allVideos.findIndex((v) => v.id === currentVideo.id);
+      const nextIdx = idx + delta;
+      if (nextIdx < 0 || nextIdx >= allVideos.length) return null;
+      return allVideos[nextIdx];
+    };
+
+    /** Next episode that actually has a video loaded, if any exists. */
+    const nextPlayable = (fromId) => {
+      const start = allVideos.findIndex((v) => v.id === fromId);
+      for (let i = 1; i <= allVideos.length; i++) {
+        const cand = allVideos[(start + i) % allVideos.length];
+        if (media.has(cand.id)) return cand;
+      }
+      return null;
+    };
+
+    const updateNavButtons = () => {
+      const hasCurrent = !!currentVideo;
+      prevBtn.disabled = !hasCurrent || !neighbor(-1);
+      nextBtn.disabled = !hasCurrent || !neighbor(1);
+      favBtn.disabled = !hasCurrent;
+      if (hasCurrent) {
+        const on = favorites.has(currentVideo.id);
+        favBtn.textContent = on ? "★ Favorited" : "☆ Favorite";
+        favBtn.setAttribute("aria-pressed", String(on));
+      }
+    };
+
+    const jumpTo = (delta) => {
+      const target = neighbor(delta);
+      if (!target) {
+        toast(delta > 0 ? "That was the last episode in the library." : "That was the first episode.", "info", 2400);
+        return;
+      }
+      playVideo(target, { autoplay: prefs.autoplayNext || delta !== 0 });
+      $("playerSection").scrollIntoView({ block: "start", behavior: "smooth" });
+    };
+
+    /* ---- video element events ---- */
+    mainVideo.addEventListener("timeupdate", () => {
+      if (!currentVideo || !mainVideo.duration || !isFinite(mainVideo.duration)) return;
+      const p = progress[currentVideo.id] || { t: 0, d: mainVideo.duration, done: false };
+      p.t = mainVideo.currentTime;
+      p.d = mainVideo.duration;
+      p.done = mainVideo.currentTime / mainVideo.duration > 0.96;
+      p.updatedAt = Date.now();
+      progress[currentVideo.id] = p;
+      saveProgress();
+    });
+
+    let progressRenderTimer = null;
+    const scheduleUiRefresh = () => {
+      if (progressRenderTimer) return;
+      progressRenderTimer = setTimeout(() => {
+        progressRenderTimer = null;
+        renderContinueRail();
+        updateProgressBars();
+      }, 1200);
+    };
+    mainVideo.addEventListener("timeupdate", scheduleUiRefresh);
+
+    mainVideo.addEventListener("pause", () => {
+      renderContinueRail();
+      updateProgressBars();
+    });
+
+    mainVideo.addEventListener("ended", () => {
+      if (!currentVideo) return;
+      const p = progress[currentVideo.id];
+      if (p) { p.done = true; p.t = 0; saveProgress(); }
+      renderContinueRail();
+      updateProgressBars();
+
+      if (!prefs.autoplayNext) {
+        toast(`${currentVideo.code} finished. Turn on autoplay to continue automatically.`, "info", 4200);
+        return;
+      }
+      const up = nextPlayable(currentVideo.id);
+      if (up && up.id !== currentVideo.id) {
+        toast(`Playing next: ${up.code}`, "ok", 2600);
+        setTimeout(() => playVideo(up, { autoplay: true, resume: false }), 900);
+      } else {
+        toast("Nothing else is loaded — add more videos to keep the playlist going.", "warn", 4600);
+      }
+    });
+
+    mainVideo.addEventListener("error", () => {
+      if (!currentVideo) return;
+      const rec = media.get(currentVideo.id);
+      if (!rec) return;
+      setStatus(`⚠️ ${rec.fileName} can't be decoded by this browser. Try re-encoding as H.264 MP4.`, "var(--bad)");
+      toast("Playback failed for that file format.", "bad", 5200);
+    });
+
+    /* =====================================================================
+       11. Library rendering
+       ===================================================================== */
+    const seasonOptions = () => {
+      SEASONS.forEach(({ season, episodes }) => {
+        const opt = document.createElement("option");
+        opt.value = String(season);
+        opt.textContent = `Season ${season} (${episodes})`;
+        seasonFilter.appendChild(opt);
+      });
+    };
+
+    const castOptions = () => {
+      const names = [...new Set(allVideos.flatMap((v) => v.cast))].sort();
+      names.forEach((n) => {
+        const opt = document.createElement("option");
+        opt.value = n;
+        opt.textContent = n;
+        castFilter.appendChild(opt);
+      });
+    };
+
+    const filteredVideos = () => {
+      const term = prefs.search.trim().toLowerCase();
+      let list = allVideos.filter((v) => {
+        if (prefs.season && v.season !== Number(prefs.season)) return false;
+        if (prefs.cast && !v.cast.includes(prefs.cast)) return false;
+        if (prefs.videoFilter === "loaded" && !media.has(v.id)) return false;
+        if (prefs.videoFilter === "missing" && media.has(v.id)) return false;
+        if (prefs.videoFilter === "fav" && !favorites.has(v.id)) return false;
+        if (!term) return true;
+        const haystack = [v.title, v.description, v.code, v.airDate, v.cast.join(" "), v.keywords.join(" ")]
+          .join(" ")
+          .toLowerCase();
+        return term.split(/\s+/).every((word) => haystack.includes(word));
+      });
+
+      const sorters = {
+        library: (a, b) => a.id - b.id,
+        views: (a, b) => b.views - a.views,
+        date: (a, b) => a.airKey.localeCompare(b.airKey) || a.id - b.id,
+        title: (a, b) => a.title.localeCompare(b.title),
+        added: (a, b) => (media.get(b.id)?.addedAt || 0) - (media.get(a.id)?.addedAt || 0) || a.id - b.id,
+        remaining: (a, b) => {
+          const rem = (v) => {
+            const p = progress[v.id];
+            const rec = media.get(v.id);
+            const dur = rec?.duration || p?.d || v.runtime * 60;
+            if (!p || !media.has(v.id)) return Number.POSITIVE_INFINITY;
+            return p.done ? Number.POSITIVE_INFINITY : dur - p.t;
+          };
+          return rem(a) - rem(b) || a.id - b.id;
+        },
+      };
+      return list.sort(sorters[prefs.sort] || sorters.library);
+    };
+
+    const makeCard = (video) => {
+      const rec = media.get(video.id);
+      const p = progress[video.id];
+      const card = document.createElement("article");
+      card.className = `video-card${rec ? "" : " missing"}${currentVideo && currentVideo.id === video.id ? " active" : ""}`;
+      card.tabIndex = 0;
+      card.dataset.id = String(video.id);
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `${video.code}, ${video.title}. ${rec ? "Video loaded." : "No video loaded."}`);
+
+      const thumb = document.createElement("div");
+      thumb.className = "video-thumbnail";
+
+      const code = document.createElement("span");
+      code.className = "badge left";
+      code.textContent = video.code;
+      thumb.appendChild(code);
+
+      const state = document.createElement("span");
+      state.className = `badge right ${rec ? (rec.fileName.includes("demo-clip") ? "demo" : "ok") : "none"}`;
+      state.textContent = rec ? (rec.fileName.includes("demo-clip") ? "DEMO" : "LOADED") : "NO FILE";
+      thumb.appendChild(state);
+
+      if (rec && rec.thumbBlob) {
+        const img = document.createElement("img");
+        img.alt = "";
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.src = thumbUrl(video.id);
+        thumb.appendChild(img);
+      } else {
+        const hue = hashString(video.code + video.title) % 360;
+        thumb.style.background = `linear-gradient(135deg, hsl(${hue}, 55%, 24%), hsl(${(hue + 70) % 360}, 60%, 38%))`;
+        const label = document.createElement("span");
+        label.className = "thumb-label";
+        label.textContent = `S${video.season}·E${video.episode}`;
+        thumb.appendChild(label);
+      }
+
+      if (p && rec && !p.done && p.t > 2) {
+        const bar = document.createElement("div");
+        bar.className = "card-progress";
+        const fill = document.createElement("span");
+        fill.style.width = `${clamp((p.t / (rec.duration || p.d || 1)) * 100, 0, 100)}%`;
+        bar.appendChild(fill);
+        thumb.appendChild(bar);
+      }
+
+      const info = document.createElement("div");
+      info.className = "video-info";
+
+      const h3 = document.createElement("h3");
+      h3.className = "video-title";
+      h3.textContent = video.title;
+
+      const meta = document.createElement("p");
+      meta.className = "video-meta";
+      meta.textContent = `${video.cast.slice(0, 2).join(", ")}${video.cast.length > 2 ? ` +${video.cast.length - 2}` : ""} · ${video.airDate} · ${video.views.toLocaleString()} views${rec ? ` · ${fmtBytes(rec.size)}` : ""}`;
+
+      const tags = document.createElement("div");
+      tags.className = "tag-row";
+
+      const seasonTag = document.createElement("span");
+      seasonTag.className = "season-tag";
+      seasonTag.textContent = `S${video.season}E${video.episode}`;
+      tags.appendChild(seasonTag);
+
+      if (p && !p.done && p.t > 2) {
+        const resumeTag = document.createElement("span");
+        resumeTag.className = "season-tag";
+        resumeTag.style.background = "var(--accent2)";
+        resumeTag.style.color = "#04222b";
+        resumeTag.textContent = `Resume ${fmtTime(p.t)}`;
+        tags.appendChild(resumeTag);
+      } else if (p && p.done) {
+        const doneTag = document.createElement("span");
+        doneTag.className = "season-tag";
+        doneTag.style.background = "rgba(16,185,129,0.85)";
+        doneTag.textContent = "✓ Watched";
+        tags.appendChild(doneTag);
+      }
+
+      const fav = document.createElement("button");
+      fav.className = `fav-btn${favorites.has(video.id) ? " on" : ""}`;
+      fav.type = "button";
+      fav.textContent = favorites.has(video.id) ? "★" : "☆";
+      fav.setAttribute("aria-label", `${favorites.has(video.id) ? "Remove" : "Add"} ${video.code} ${favorites.has(video.id) ? "from" : "to"} favorites`);
+      fav.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleFavorite(video.id);
+      });
+      tags.appendChild(fav);
+
+      info.append(h3, meta, tags);
+      card.append(thumb, info);
+
+      card.addEventListener("click", () => {
+        playVideo(video, { autoplay: true });
+        $("playerSection").scrollIntoView({ block: "start", behavior: "smooth" });
+      });
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          card.click();
+        }
+      });
+
+      return card;
+    };
+
+    const markActiveCard = () => {
+      videoGrid.querySelectorAll(".video-card").forEach((card) => {
+        card.classList.toggle("active", currentVideo && card.dataset.id === String(currentVideo.id));
+      });
+    };
+
+    const updateProgressBars = () => {
+      videoGrid.querySelectorAll(".video-card").forEach((card) => {
+        const id = Number(card.dataset.id);
+        const p = progress[id];
+        const rec = media.get(id);
+        const bar = card.querySelector(".card-progress > span");
+        if (bar && p && rec) bar.style.width = `${clamp((p.t / (rec.duration || p.d || 1)) * 100, 0, 100)}%`;
+      });
+    };
+
+    const renderVideos = () => {
+      const list = filteredVideos();
+      renderedIds = list.slice(0, visibleCount).map((v) => v.id);
+
+      videoGrid.innerHTML = "";
+      const frag = document.createDocumentFragment();
+      list.slice(0, visibleCount).forEach((v) => frag.appendChild(makeCard(v)));
+      videoGrid.appendChild(frag);
+
+      noResults.hidden = list.length !== 0;
+      loadMoreWrap.hidden = list.length <= visibleCount;
+      loadMoreBtn.textContent = `Load more episodes (${list.length - visibleCount} remaining)`;
+
+      const loadedInList = list.filter((v) => media.has(v.id)).length;
+      resultCount.textContent = `Showing ${Math.min(visibleCount, list.length)} of ${list.length} episodes${
+        list.length !== allVideos.length ? ` (filtered from ${allVideos.length})` : ""
+      } · ${loadedInList} with local video`;
+    };
+
+    const renderContinueRail = () => {
+      const items = Object.entries(progress)
+        .map(([id, p]) => ({ video: byId.get(Number(id)), p }))
+        .filter(({ video, p }) => video && media.has(video.id) && !p.done && p.t > 5)
+        .sort((a, b) => (b.p.updatedAt || 0) - (a.p.updatedAt || 0))
+        .slice(0, 12);
+
+      continueSection.hidden = items.length === 0;
+      continueRail.innerHTML = "";
+
+      items.forEach(({ video, p }) => {
+        const rec = media.get(video.id);
+        const dur = rec?.duration || p.d || video.runtime * 60;
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "mini-card";
+        card.setAttribute("aria-label", `Resume ${video.code}, ${video.title}, ${fmtTime(dur - p.t)} remaining`);
+
+        const thumb = document.createElement("div");
+        thumb.className = "mini-thumb";
+        if (rec && rec.thumbBlob) {
+          const img = document.createElement("img");
+          img.alt = "";
+          img.loading = "lazy";
+          img.src = thumbUrl(video.id);
+          thumb.appendChild(img);
+        }
+        const bar = document.createElement("div");
+        bar.className = "mini-progress";
+        const fill = document.createElement("span");
+        fill.style.width = `${clamp((p.t / dur) * 100, 0, 100)}%`;
+        bar.appendChild(fill);
+        thumb.appendChild(bar);
+
+        const body = document.createElement("div");
+        body.className = "mini-body";
+        const title = document.createElement("p");
+        title.className = "mini-title";
+        title.textContent = `${video.code} · ${video.title}`;
+        const sub = document.createElement("p");
+        sub.className = "mini-sub";
+        sub.textContent = `${fmtTime(p.t)} watched · ${fmtTime(dur - p.t)} left`;
+        body.append(title, sub);
+
+        card.append(thumb, body);
+        card.addEventListener("click", () => {
+          playVideo(video, { autoplay: true, resume: true });
+          $("playerSection").scrollIntoView({ block: "start", behavior: "smooth" });
+        });
+        continueRail.appendChild(card);
+      });
+    };
+
+    const renderSummary = async () => {
+      $("sumEpisodes").textContent = String(allVideos.length);
+      $("sumLoaded").textContent = String(media.size);
+      let totalBytes = 0;
+      let totalSeconds = 0;
+      media.forEach((rec) => {
+        totalBytes += rec.size || 0;
+        totalSeconds += rec.duration || 0;
+      });
+      $("sumRuntime").textContent = fmtRuntime(totalSeconds);
+      $("sumSize").textContent = fmtBytes(totalBytes);
+
+      if (navigator.storage && navigator.storage.estimate) {
+        try {
+          const est = await navigator.storage.estimate();
+          $("sumSize").textContent = `${fmtBytes(est.usage || totalBytes)}`;
+          $("sumSize").title = est.quota ? `Quota ${fmtBytes(est.quota)}` : "";
+        } catch { /* estimate unavailable */ }
+      }
+    };
+
+    const refreshAll = () => {
+      renderVideos();
+      renderContinueRail();
+      renderSummary();
+      updateNavButtons();
+      markActiveCard();
+    };
+
+    /* =====================================================================
+       12. Favorites + clearing
+       ===================================================================== */
+    const toggleFavorite = (id) => {
+      if (favorites.has(id)) favorites.delete(id);
+      else favorites.add(id);
+      saveFavorites();
+      renderVideos();
+      updateNavButtons();
+      toast(favorites.has(id) ? `${byId.get(id).code} added to favorites` : `${byId.get(id).code} removed from favorites`, "info", 2000);
+    };
+
+    const clearAllVideos = async () => {
+      if (!media.size) {
+        toast("Nothing loaded to clear.", "info", 2400);
+        return;
+      }
+      const count = media.size;
+      const ok = window.confirm(`Remove all ${count} locally stored video file(s)? Watch history and favorites are kept.`);
+      if (!ok) return;
+
+      mainVideo.pause();
+      mainVideo.removeAttribute("src");
+      mainVideo.load();
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+      thumbUrls.forEach((url) => URL.revokeObjectURL(url));
+      objectUrls.clear();
+      thumbUrls.clear();
+      media.clear();
+
+      try {
+        await Promise.all([storage.clearMedia(), storage.clearThumbs()]);
+      } catch {
+        toast("Local database could not be fully cleared.", "warn", 4600);
+      }
+
+      setStatus(`🗑️ Cleared ${count} video file(s) from local storage.`);
+      updateEmptyStage();
+      refreshAll();
+      toast(`Cleared ${count} video(s).`, "ok");
+    };
+
+    /* =====================================================================
+       13. Events: filters, upload, keyboard
+       ===================================================================== */
+    searchBox.addEventListener("input", () => {
+      prefs.search = searchBox.value;
+      visibleCount = PAGE_SIZE;
+      savePrefs();
+      renderVideos();
+    });
+
+    seasonFilter.addEventListener("change", () => {
+      prefs.season = seasonFilter.value;
+      visibleCount = PAGE_SIZE;
+      savePrefs();
+      renderVideos();
+    });
+
+    castFilter.addEventListener("change", () => {
+      prefs.cast = castFilter.value;
+      visibleCount = PAGE_SIZE;
+      savePrefs();
+      renderVideos();
+    });
+
+    videoFilter.addEventListener("change", () => {
+      prefs.videoFilter = videoFilter.value;
+      visibleCount = PAGE_SIZE;
+      savePrefs();
+      renderVideos();
+    });
+
+    sortSelect.addEventListener("change", () => {
+      prefs.sort = sortSelect.value;
+      visibleCount = PAGE_SIZE;
+      savePrefs();
+      renderVideos();
+    });
+
+    viewBtn.addEventListener("click", () => {
+      prefs.view = prefs.view === "grid" ? "list" : "grid";
+      savePrefs();
+      applyView();
+    });
+
+    const applyView = () => {
+      const list = prefs.view === "list";
+      videoGrid.classList.toggle("list", list);
+      viewBtn.textContent = list ? "▦ Grid view" : "☰ List view";
+      viewBtn.setAttribute("aria-pressed", String(list));
+    };
+
+    loadMoreBtn.addEventListener("click", () => {
+      visibleCount += PAGE_SIZE;
+      renderVideos();
+    });
+
+    $("browseBtn").addEventListener("click", () => {
+      delete fileInput.dataset.targetCurrent; // a cancelled dialog must not leak this flag
+      fileInput.click();
+    });
+    $("targetBtn").addEventListener("click", () => {
+      if (!currentVideo) {
+        toast("Select an episode in the player first, then assign a file to it.", "warn", 4200);
+        return;
+      }
+      fileInput.dataset.targetCurrent = "1";
+      fileInput.click();
+    });
+    $("clearBtn").addEventListener("click", clearAllVideos);
+    $("demoBtn").addEventListener("click", generateDemoClip);
+    prevBtn.addEventListener("click", () => jumpTo(-1));
+    nextBtn.addEventListener("click", () => jumpTo(1));
+    favBtn.addEventListener("click", () => currentVideo && toggleFavorite(currentVideo.id));
+
+    autoplayNext.addEventListener("change", () => {
+      prefs.autoplayNext = autoplayNext.checked;
+      savePrefs();
+      toast(prefs.autoplayNext ? "Autoplay next episode is on." : "Autoplay next episode is off.", "info", 2200);
+    });
+
+    fileInput.addEventListener("change", async (e) => {
+      const assignToCurrent = fileInput.dataset.targetCurrent === "1";
+      delete fileInput.dataset.targetCurrent;
+      await handleFiles(e.target.files, { assignToCurrent });
       fileInput.value = "";
     });
 
-    const clearAllVideos = () => {
-      allVideos.forEach((video) => {
-        if (video.mp4Url) {
-          URL.revokeObjectURL(video.mp4Url);
-          video.mp4Url = null;
+    ["dragenter", "dragover"].forEach((evt) =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add("dragover");
+      })
+    );
+
+    ["dragleave", "drop"].forEach((evt) =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (evt === "dragleave" && dropzone.contains(e.relatedTarget)) return;
+        dropzone.classList.remove("dragover");
+      })
+    );
+
+    dropzone.addEventListener("drop", async (e) => {
+      const files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files.length) await handleFiles(files, { assignToCurrent: !!currentVideo && files.length === 1 && !guessEpisodeFromName(files[0].name) });
+    });
+
+    // Whole-window drag guard so the browser doesn't navigate away.
+    ["dragover", "drop"].forEach((evt) =>
+      window.addEventListener(evt, (e) => {
+        if (!dropzone.contains(e.target)) e.preventDefault();
+      })
+    );
+
+    document.addEventListener("keydown", (e) => {
+      const t = e.target;
+      const tag = t && t.tagName ? t.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea" || tag === "select" || (t && t.isContentEditable)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const step = (secs) => {
+        if (!mainVideo.src) return;
+        mainVideo.currentTime = clamp(mainVideo.currentTime + secs, 0, mainVideo.duration || Infinity);
+      };
+      const togglePlay = () => {
+        if (!mainVideo.src) {
+          if (currentVideo) playVideo(currentVideo, { autoplay: true });
+          else toast("Select an episode first.", "info", 2200);
+          return;
         }
+        if (mainVideo.paused) mainVideo.play().catch(() => {});
+        else mainVideo.pause();
+      };
+
+      switch (e.key.toLowerCase()) {
+        case " ":
+        case "k":
+          e.preventDefault();
+          togglePlay();
+          break;
+        case "arrowleft":
+          e.preventDefault();
+          step(-5);
+          break;
+        case "arrowright":
+          e.preventDefault();
+          step(5);
+          break;
+        case "j":
+          step(-10);
+          break;
+        case "l":
+          step(10);
+          break;
+        case "arrowup":
+          e.preventDefault();
+          mainVideo.volume = clamp((mainVideo.volume || 0) + 0.1, 0, 1);
+          mainVideo.muted = false;
+          break;
+        case "arrowdown":
+          e.preventDefault();
+          mainVideo.volume = clamp((mainVideo.volume || 0) - 0.1, 0, 1);
+          break;
+        case "m":
+          mainVideo.muted = !mainVideo.muted;
+          break;
+        case "f": {
+          const container = mainVideo.parentElement;
+          if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+          else if (container.requestFullscreen) container.requestFullscreen().catch(() => {});
+          break;
+        }
+        case "n":
+          if (currentVideo) jumpTo(1);
+          break;
+        case "p":
+          if (currentVideo) jumpTo(-1);
+          break;
+        case "/":
+          e.preventDefault();
+          searchBox.focus();
+          searchBox.select();
+          break;
+        case "escape":
+          if (document.activeElement === searchBox) searchBox.blur();
+          break;
+        default:
+          break;
+      }
+    });
+
+    /* =====================================================================
+       14. Boot: restore from local database, hydrate UI
+       ===================================================================== */
+    const restore = async () => {
+      const [records, thumbRecords] = await Promise.all([
+        storage.getAllMedia(),
+        (async () => {
+          try {
+            const db = await openDb();
+            return await new Promise((resolve) => {
+              const out = [];
+              const tx = db.transaction("thumbs", "readonly");
+              const req = tx.objectStore("thumbs").openCursor();
+              req.onsuccess = () => {
+                const cursor = req.result;
+                if (cursor) {
+                  out.push(cursor.value);
+                  cursor.continue();
+                } else resolve(out);
+              };
+              req.onerror = () => resolve(out);
+            });
+          } catch {
+            return [];
+          }
+        })(),
+      ]);
+
+      const thumbsById = new Map(thumbRecords.map((r) => [r.id, r.blob]));
+
+      records.forEach((rec) => {
+        if (!rec || !rec.blob || !byId.has(rec.id)) return;
+        media.set(rec.id, {
+          id: rec.id,
+          blob: rec.blob,
+          thumbBlob: thumbsById.get(rec.id) || null,
+          fileName: rec.fileName || `episode-${rec.id}.mp4`,
+          size: rec.size || rec.blob.size || 0,
+          format: rec.format || "mp4",
+          duration: rec.duration || 0,
+          width: rec.width || 0,
+          height: rec.height || 0,
+          addedAt: rec.addedAt || 0,
+        });
       });
-      mainVideo.src = "";
-      uploadStatus.textContent = "🗑️ All videos cleared.";
-      uploadStatus.style.color = "#ef4444";
-      renderVideos(filteredVideos);
+
+      return records.length;
     };
 
-    searchBox.addEventListener("input", filterVideos);
-    seasonFilter.addEventListener("change", filterVideos);
+    const hydratePrefs = () => {
+      searchBox.value = prefs.search || "";
+      seasonFilter.value = prefs.season || "";
+      castFilter.value = prefs.cast || "";
+      videoFilter.value = prefs.videoFilter || "";
+      sortSelect.value = prefs.sort || "library";
+      autoplayNext.checked = !!prefs.autoplayNext;
+      applyView();
+    };
 
-    // Initial render
-    renderVideos(allVideos);
+    const initPersistenceBadge = async () => {
+      const el = $("persistState");
+      const btn = $("persistBtn");
+      if (!navigator.storage || !navigator.storage.persisted) {
+        el.textContent = "Local storage: browser-managed (may be cleared to free space).";
+        return;
+      }
+      try {
+        const persisted = await navigator.storage.persisted();
+        el.textContent = persisted
+          ? "Local storage: persistent — this browser won't evict your videos automatically."
+          : "Local storage: best-effort — the browser may evict videos if space runs low.";
+        if (!persisted) {
+          btn.hidden = false;
+          btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            const ok = await navigator.storage.persist().catch(() => false);
+            btn.hidden = true;
+            el.textContent = ok
+              ? "Local storage: persistent — this browser won't evict your videos automatically."
+              : "The browser declined persistent storage. Videos still work, but may be cleared under pressure.";
+            toast(ok ? "Persistent storage enabled." : "Persistent storage was declined.", ok ? "ok" : "warn", 4200);
+          });
+        }
+      } catch {
+        el.textContent = "Local storage: available.";
+      }
+    };
+
+    const boot = async () => {
+      seasonOptions();
+      castOptions();
+      hydratePrefs();
+      updateEmptyStage();
+
+      let restored = 0;
+      try {
+        restored = await restore();
+      } catch (err) {
+        toast("Local database unavailable — running in session-only mode.", "warn", 5200);
+      }
+
+      visibleCount = PAGE_SIZE;
+      refreshAll();
+      initPersistenceBadge();
+
+      if (restored > 0) {
+        setStatus(`✅ Restored ${restored} video(s) from this device's local library.`);
+        toast(`Restored ${restored} local video(s).`, "ok", 3200);
+        // Resume where the viewer left off.
+        const lastId = Object.entries(progress)
+          .filter(([id]) => media.has(Number(id)))
+          .sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0))[0];
+        if (lastId) {
+          const v = byId.get(Number(lastId[0]));
+          if (v) {
+            playVideo(v, { autoplay: false, resume: true });
+            $("playerSection").scrollIntoView({ block: "nearest" });
+          }
+        }
+      } else {
+        setStatus("💡 Drop MP4 files onto the upload box — filenames like S02E05 auto-match their episode.");
+      }
+
+      const canRecord =
+        typeof window.MediaRecorder !== "undefined" &&
+        typeof document.createElement("canvas").captureStream === "function";
+      $("demoBtn").hidden = !canRecord;
+    };
+
+    boot();
   </script>
 </body>
 </html>
